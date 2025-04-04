@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Appointments</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io.connect('http://localhost:5000');
+            socket.emit('join', { room: 'doctor_{{ current_user.id }}' });
+
+            socket.on('new_request', function(data) {
+                alert('New consultation request received!');
+                window.location.reload();
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2>Appointments</h2>
+
+    <div id="requests">
+        {% if requests %}
+            <ul>
+                {% for request in requests %}
+                    <li>
+                        Request ID: {{ request.formatted_id }}
+                        Patient ID: {{ request.patient_id }}
+                        <p>Status: {{ request.status }}</p>
+                        {% if request.status == 'pending' %}
+                            <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='accept') }}">
+                                <button type="submit">Accept</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='reject') }}">
+                                <button type="submit">Reject</button>
+                            </form>
+                        {% elif request.status == 'accepted' %}
+                            <form method="POST" action="{{ url_for('doctor_bp.end_consultation', request_id=request.id) }}">
+                                <button type="submit">End Consultation</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No pending or accepted requests.</p>
+        {% endif %}
+    </div>
+
+    <p><a href="{{ url_for('doctor_bp.dc_home') }}">Back to Home</a></p>
+</body>
+</html>

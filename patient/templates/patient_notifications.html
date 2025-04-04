@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+</head>
+<body>
+    <h2>Notifications</h2>
+
+    <div id="notifications">
+        {% if notifications %}
+            <ul>
+                {% for notification in notifications %}
+                    <li>
+                        {{ notification.message }}
+                        <p>Time: {{ notification.time }}</p>
+                        <p>Consultation Request ID: {{ notification.consultation_request_id }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No notifications.</p>
+        {% endif %}
+    </div>
+
+    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
+</body>
+</html>

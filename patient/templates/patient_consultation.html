@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Consultation</title>
+</head>
+<body>
+    <h2>Consultation</h2>
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+    {% endif %}
+    <h3>Online Doctors</h3>
+    {% if online_doctors %}
+        <ul>
+            {% for doctor in online_doctors %}
+                <li>
+                    {{ doctor.department }} - {{ doctor.full_name }} - {{ doctor.title }}
+                    <form method="POST" action="{{ url_for('patient_bp.send_request', doctor_id=doctor.id) }}">
+                        <button type="submit">Send Request</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No online doctors available.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
+</body>
+</html>

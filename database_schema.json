@@ -1,0 +1,126 @@
+{
+  "database": "ch_test_not_safe",
+  "tables": [
+    {
+      "name": "admins",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
+        {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
+        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"}
+      ]
+    },
+    {
+      "name": "doctors",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
+        {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
+        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "is_online", "type": "TINYINT(1)", "constraints": "DEFAULT 0"}
+      ]
+    },
+    {
+      "name": "patients",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
+        {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
+        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"}
+      ]
+    },
+    {
+      "name": "patient_profiles",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
+        {"name": "full_name", "type": "VARCHAR(100)", "constraints": "NOT NULL"},
+        {"name": "gender", "type": "VARCHAR(10)", "constraints": "NOT NULL"},
+        {"name": "birth_date", "type": "DATE", "constraints": "NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "id", "references": "patients(id)"}
+      ]
+    },
+    {
+      "name": "doctor_profiles",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
+        {"name": "full_name", "type": "VARCHAR(100)", "constraints": "NOT NULL"},
+        {"name": "gender", "type": "VARCHAR(10)", "constraints": "NOT NULL"},
+        {"name": "birth_date", "type": "DATE", "constraints": "NOT NULL"},
+        {"name": "department", "type": "VARCHAR(50)", "constraints": "NOT NULL"},
+        {"name": "title", "type": "VARCHAR(50)", "constraints": "NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "id", "references": "doctors(id)"}
+      ]
+    },
+     {
+      "name": "consultation_requests",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "doctor_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "status", "type": "VARCHAR(20)", "constraints": "NOT NULL"},
+        {"name": "request_time", "type": "DATETIME", "constraints": "NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "patient_id", "references": "patients(id)"},
+        {"column": "doctor_id", "references": "doctors(id)"}
+      ]
+    },
+    {
+      "name": "medical_records",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "consultation_request_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "doctor_id", "type": "INT", "constraints": "NOT NULL"},
+
+        {"name": "visit_date", "type": "DATETIME", "constraints": "NOT NULL"},
+        {"name": "department", "type": "VARCHAR(50)", "constraints": "NOT NULL"},
+        {"name": "patient_complaint", "type": "TEXT"},
+        {"name": "medical_history", "type": "TEXT"},
+        {"name": "physical_examination", "type": "TEXT"},
+        {"name": "auxiliary_examination", "type": "TEXT"},
+        {"name": "diagnosis", "type": "TEXT"},
+        {"name": "treatment_advice", "type": "TEXT"},
+        {"name": "doctor_signature", "type": "VARCHAR(100)"},
+
+        {"name": "status", "type": "VARCHAR(20)", "constraints": "NOT NULL DEFAULT 'uc'"},
+        {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"}
+      ],
+      "foreign_keys": [
+        {"column": "patient_id", "references": "patients(id)"},
+        {"column": "doctor_id", "references": "doctors(id)"},
+        {"column": "consultation_request_id", "references": "consultation_requests(id)"}
+      ]
+    },
+    {
+      "name": "patient_notifications",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "consultation_request_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "message", "type": "TEXT", "constraints": "NOT NULL"},
+        {"name": "time", "type": "DATETIME", "constraints": "NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "patient_id", "references": "patients(id)"},
+        {"column": "consultation_request_id", "references": "consultation_requests(id)"}
+      ]
+    },
+    {
+      "name": "review_records",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "mr_id","type":"INT","constraints": "NOT NULL"},
+        {"name": "result", "type": "BOOLEAN", "constraints": "DEFAULT FALSE NOT NULL"},
+        {"name": "review_opinions", "type": "TEXT"},
+        {"name": "review_by", "type": "INT"},
+        {"name": "review_date", "type": "DATETIME"}
+      ],
+      "foreign_keys": [
+        {"column": "mr_id", "references": "medical_records(id)"},
+        {"column": "review_by", "references": "admins(id)"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+mysql~=0.0.3
+mysql-connector-python~=9.1.0
+flask~=3.0.0
+werkzeug~=3.0.1
+gmssl~=3.2.2

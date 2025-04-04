@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctor Register</title>
+</head>
+<body>
+    <h2>Doctor Register</h2>
+    {% if message %}
+        <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
+    {% endif %}
+    <form method="POST" action="/doctor/register">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="/doctor/login">Login</a></p>
+</body>
+</html>

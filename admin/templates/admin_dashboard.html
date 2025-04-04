@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>欢迎回来，管理员 {{ username }}!</h2>
+    <p></p>
+    <div><a href="{{ url_for('admin_bp.review_list') }}">Review Medical Records</a></div>
+    <div><a href="{{ url_for('admin_bp.logout') }}">Logout</a></div>
+</body>
+</html>

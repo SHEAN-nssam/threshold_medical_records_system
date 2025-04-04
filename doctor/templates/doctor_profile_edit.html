@@ -1,0 +1,46 @@
+<!-- doctor_profile_edit.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Personal Information</title>
+</head>
+<body>
+    <h2>Edit Personal Information</h2>
+
+    <form method="POST">
+        <label for="full_name">Full Name:</label>
+        <input type="text" id="full_name" name="full_name" required value="{{ profile_data.full_name if profile_data else '' }}"><br><br>
+
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="male">{% if profile_data.gender == 'male'%}selected{% endif %}Male</option>
+            <option value="female">{% if profile_data.gender == 'female'%}selected{% endif %}Female</option>
+        </select><br><br>
+
+        <label for="birth_date">Birth Date:</label>
+        <input type="date" id="birth_date" name="birth_date" required value="{{ profile_data.birth_date.strftime('%Y-%m-%d') if profile_data else '' }}"><br><br>
+
+        <label for="department">Department:</label>
+        <select id="department" name="department" required>
+            <option value="cardiology">{% if profile_data.department == 'cardiology' %}selected{% endif %}Cardiology</option>
+            <option value="neurology" >{% if profile_data.department == 'neurology' %}selected{% endif %}Neurology</option>
+            <option value="oncology">{% if profile_data.department == 'oncology' %}selected{% endif %}Oncology</option>
+            <option value="pediatrics">{% if profile_data.department == 'pediatrics' %}selected{% endif %}Pediatrics</option>
+            <option value="orthopedics">{% if profile_data.department == 'orthopedics' %}selected{% endif %}Orthopedics</option>
+        </select><br><br>
+
+        <label for="title">Title:</label>
+        <select id="title" name="title" required>
+            <option value="Medical Assistant" >{% if profile_data.title == 'Medical Assistant' %}selected{% endif %}Medical Assistant</option>
+            <option value="Licensed Physician"> {% if profile_data.title == 'Licensed Physician' %}selected{% endif %}Licensed Physician</option>
+            <option value="Attending Physician"> {% if profile_data.title == 'Attending Physician' %}selected{% endif %}Attending Physician</option>
+            <option value="Associate Chief Physician"> {% if profile_data.title == 'Associate Chief Physician' %}selected{% endif %}Associate Chief Physician</option>
+            <option value="Chief Physician" >{% if profile_data.title == 'Chief Physician' %}selected{% endif %}Chief Physician</option>
+        </select><br><br>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <p><a href="{{ url_for('doctor_bp.display_profile') }}">Back to Personal Information</a></p>
+</body>
+</html>

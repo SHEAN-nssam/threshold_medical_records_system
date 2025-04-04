@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h2>欢迎,医生 {{ username }}!</h2>
+    <h2>登录状态： {{ username }} (ID: {{ user_id }})</h2>
+     <div>
+        {% if not profile_completed %}
+            <p style="color: orange;">Your personal information is pending completion. Please complete it to enable appointment services.</p>
+        {% endif %}
+    </div>
+    <div><a href="{{ url_for('doctor_bp.display_profile') }}">Personal Information</a></div>
+    <div><a href="{{ url_for('doctor_bp.view_appointments') }}">Appointments</a></div>
+    <div><a href="{{ url_for('doctor_bp.request_list') }}">check request</a></div>
+    <div><a href="{{ url_for('doctor_bp.logout') }}">Logout</a></div>
+</body>
+</html>
+

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Profile</title>
+</head>
+<body>
+    <h2>Personal Information</h2>
+
+    {% if message %}
+        <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+    {% if not profile_completed %}
+        <!-- 如果用户未填写信息，显示表单 -->
+    <form method="POST">
+        <label for="full_name">Full Name:</label>
+        <input type="text" id="full_name" name="full_name" required><br><br>
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+        </select><br><br>
+
+        <label for="birth_date">Birth Date:</label>
+        <input type="date" id="birth_date" name="birth_date" required><br><br>
+
+        <p style="color: blue;">Note: Once submitted, personal information cannot be changed.</p>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% else %}
+        <!-- 如果用户已填写信息，显示已填写的信息 -->
+        <p>Full Name: {{ profile_data.full_name }}</p>
+        <p>Gender: {{ profile_data.gender }}</p>
+        <p>Birth Date: {{ profile_data.birth_date }}</p>
+        <p>Age: {{ age }}</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
+</body>
+</html>

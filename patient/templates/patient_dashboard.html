@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>欢迎，问诊者 {{ username }}!</h2>
+    <h2>登录状态：{{ username }} (ID: {{ user_id }})</h2>
+    <div>
+        {% if not profile_completed %}
+            <p style="color: orange;">Your personal information is pending completion. Please complete it to enable consultation services.</p>
+        {% endif %}
+    </div>
+    <div><a href="{{ url_for('patient_bp.display_profile') }}">Personal Information</a></div>
+    <div><a href="{{ url_for('patient_bp.consultation') }}">Consultation</a></div>
+    <div><a href="{{ url_for('patient_bp.notifications') }}">Notifications</a></div>
+    <div><a href="{{ url_for('patient_bp.medical_records') }}">Medical Records</a></div>
+    <div><a href="{{ url_for('patient_bp.logout') }}">Logout</a></div>
+</body>
+</html>

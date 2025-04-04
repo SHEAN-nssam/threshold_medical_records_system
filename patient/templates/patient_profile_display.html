@@ -1,0 +1,23 @@
+<!-- patient_profile_display.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personal Information</title>
+</head>
+<body>
+    <h2>Personal Information</h2>
+
+    {% if not profile_complete %}
+        <p>Please complete your personal information as soon as possible.</p>
+        <a href="{{ url_for('patient_bp.edit_profile') }}">Complete Personal Information</a>
+    {% else %}
+        <p>Full Name: {{ profile_data.full_name }}</p>
+        <p>Gender: {{ profile_data.gender }}</p>
+        <p>Birth Date: {{ profile_data.birth_date }}</p>
+        <p>Age: {{age }}</p>
+        <a href="{{ url_for('patient_bp.edit_profile') }}">Edit Personal Information</a>
+    {% endif %}
+
+    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
+</body>
+</html>
