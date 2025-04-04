@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Register</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
+<div class="container">
+    <main>
+        <div class="card doctor-card">
     <h2>Doctor Register</h2>
     {% if message %}
         <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
@@ -17,6 +23,9 @@
 
         <button type="submit">Register</button>
     </form>
-    <p>Already have an account? <a href="/doctor/login">Login</a></p>
+    <p style="margin-top: 20px;">Already have an account? <a href="/doctor/login">Login</a></p>
+        </div>
+    </main>
+</div>
 </body>
 </html>

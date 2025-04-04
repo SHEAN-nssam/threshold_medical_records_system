@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
+<div class="container">
+    <header>
     <h2>Admin Login</h2>
-    {% if message %}
-        <p style="color: red;">{{ message }}</p>
-    {% endif %}
+    </header>
+    <main>
+    <div class="card admin-card">
     <form method="POST" action="/admin/login">
+        {% if message %}
+            <p style="color: red;">{{ message }}</p>
+        {% endif %}
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
 
@@ -17,6 +25,9 @@
 
         <button type="submit">Login</button>
     </form>
-    <p>Don't have an account? <a href="/admin/register">Register</a></p>
+    <p style="margin-top: 20px;">Don't have an account? <a href="/admin/register">Register</a></p>
+        </div>
+    </main>
+</div>
 </body>
 </html>

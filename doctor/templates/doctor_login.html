@@ -1,14 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Login</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
-    <h2>Doctor Login</h2>
-    {% if message %}
+    <div class="container">
+        <header>
+            <h2>Doctor Login</h2>
+        </header>
+        <main>
+            <div class="card doctor-card">
+
+    <form method="POST" action="/doctor/login">
+        {% if message %}
         <p style="color: red;">{{ message }}</p>
     {% endif %}
-    <form method="POST" action="/doctor/login">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
 
@@ -17,6 +26,9 @@
 
         <button type="submit">Login</button>
     </form>
-    <p>Don't have an account? <a href="/doctor/register">Register</a></p>
+    <p style="margin-top: 20px;">Don't have an account? <a href="/doctor/register">Register</a></p>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
