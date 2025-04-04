@@ -1,4 +1,44 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者登录</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>患者登录</h1>
+            <p>请使用您的账户信息登录</p>
+        </header>
+
+        <main>
+            <div class="card patient-card">
+                <form method="POST" action="/patient/login">
+                    {% if message %}
+                        <p style="color: red; margin-bottom: 20px;">{{ message }}</p>
+                    {% endif %}
+
+                    <label for="username">用户名:</label>
+                    <input type="text" id="username" name="username" required class="form-input"><br><br>
+
+                    <label for="password">密码:</label>
+                    <input type="password" id="password" name="password" required class="form-input"><br><br>
+
+                    <button type="submit" class="btn patient-btn">登录</button>
+                </form>
+
+                <p style="margin-top: 20px;">没有账户？<a href="/patient/register">注册</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
+<!--
+<!DOCTYPE html>
 <html>
 <head>
     <title>Patient Login</title>
@@ -20,3 +60,4 @@
     <p>Don't have an account? <a href="/patient/register">Register</a></p>
 </body>
 </html>
+-->

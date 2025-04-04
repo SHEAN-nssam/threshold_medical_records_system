@@ -1,24 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>Patient Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者注册</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
-    <h2>Patient Register</h2>
-    {% if message %}
-        <p style="color: green;">
-            {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}
-    </p>
-    {% endif %}
-    <form method="POST" action="/patient/register">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+<div class="container">
+    <main>
+        <div class="card patient-card">
+            <h2>Patient Register</h2>
+                {% if message %}
+                    <p style="color: green;">{% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
+                {% endif %}
+                <form method="POST" action="/patient/register">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required><br><br>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required><br><br>
 
-        <button type="submit">Register</button>
-    </form>
-    <p>Already have an account? <a href="/patient/login">Login</a></p>
+                    <button type="submit" class="btn patient-btn">Register</button>
+                </form>
+            <p style="margin-top: 20px;">Already have an account? <a href="/patient/login">Login</a></p>
+        </div>
+    </main>
+</div>
 </body>
 </html>
