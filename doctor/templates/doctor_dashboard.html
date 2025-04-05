@@ -1,20 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生主页</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
-    <h2>欢迎,医生 {{ username }}!</h2>
+<div class="container">
+    <header>
+            <h1>医疗系统</h1>
+    </header>
+
+    <div class="content">
+        <div class="sidebar">
+<h2>功能菜单</h2>
+             <div class="function-buttons">
+                 <a href="{{ url_for('doctor_bp.display_profile') }}" class="function-button blue"><h3>Personal Information</h3></a>
+    <a href="{{ url_for('doctor_bp.view_appointments') }}" class="function-button green"><h3>Appointments</h3></a>
+                 <a href="{{ url_for('doctor_bp.request_list') }}" class="function-button orange"><h3>check request</h3></a>
+        </div>
+</div>
+        <div class="main-content">
+<h2>欢迎,医生 {{ username }}!</h2>
     <h2>登录状态： {{ username }} (ID: {{ user_id }})</h2>
-     <div>
+     <div class="notification">
         {% if not profile_completed %}
             <p style="color: orange;">Your personal information is pending completion. Please complete it to enable appointment services.</p>
         {% endif %}
     </div>
-    <div><a href="{{ url_for('doctor_bp.display_profile') }}">Personal Information</a></div>
-    <div><a href="{{ url_for('doctor_bp.view_appointments') }}">Appointments</a></div>
-    <div><a href="{{ url_for('doctor_bp.request_list') }}">check request</a></div>
-    <div><a href="{{ url_for('doctor_bp.logout') }}">Logout</a></div>
+             <div class="content-area">
+                    <!-- 这里可以放置具体页面的内容 -->
+                    <p>这是主页内容区域。</p>
+                </div>
+        </div>
+    </div>
+
+     <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
+</div>
+<script>
+        function logout() {
+            // 处理退出登录的逻辑
+            window.location.href = "{{ url_for('patient_bp.logout') }}";
+        }
+    </script>
+
 </body>
 </html>
 

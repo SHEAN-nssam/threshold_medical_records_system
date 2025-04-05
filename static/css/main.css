@@ -254,26 +254,26 @@ footer {
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* 个人信息按钮样式 */
-.personal-info {
+/* 蓝色按钮样式 用于个人信息*/
+.blue {
     background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
     color: #01579b;
 }
 
-/* 问诊服务按钮样式 */
-.consultation {
+/* 绿色按钮样式 用于就/问诊*/
+.green {
     background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
     color: #1b5e20;
 }
 
-/* 通知消息按钮样式 */
-.notifications {
+/* 橙色通知消息按钮样式 */
+.orange {
     background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
     color: #ff6f00;
 }
 
-/* 病历记录按钮样式 */
-.medical-records {
+/* 紫色病历记录按钮样式 */
+.purple {
     background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
     color: #7b1fa2;
 }

@@ -1,10 +1,105 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者主页</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<div class="container">
+        <header>
+            <h1>医疗系统</h1>
+            <p>连接医疗专业人员并管理您的健康记录</p>
+        </header>
+
+        <div class="content">
+            <div class="sidebar">
+                <h2>功能菜单</h2>
+
+                    <div class="function-buttons">
+                        <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
+                            <h3>个人信息</h3>
+                            <p>管理您的个人信息</p>
+                        </a>
+                        <a href="{{ url_for('patient_bp.consultation') }}" class="function-button green">
+                            <h3>问诊服务</h3>
+                            <p>预约和管理您的问诊</p>
+                        </a>
+                        <a href="{{ url_for('patient_bp.notifications') }}" class="function-button orange">
+                            <h3>通知消息</h3>
+                            <p>查看系统通知</p>
+                        </a>
+                        <a href="{{ url_for('patient_bp.medical_records') }}" class="function-button purple">
+                            <h3>病历记录</h3>
+                            <p>查看您的病历记录</p>
+                        </a>
+                    </div>
+
+                </div>
+
+
+            <div class="main-content">
+                <div class="content-area">
+                    <h2>既往病历查询</h2>
+                    <!-- 这里可以放置具体页面的内容 -->
+                    <div id="records">
+        {% if records %}
+            <ul>
+                {% for record in records %}
+                    <li>
+                        病历号: {{ record.id }}
+                        <p>医生号: {{ record.doctor_id }}</p>
+                        <p>患者号: {{ record.patient_id }}</p>
+                        <p>问诊申请号:{{ record.consultation_request_id }}</p>
+                        <p>病历创建时间:{{ record.created_at}}</p>
+                        <p>状态: {{ record.status }}</p>
+
+                        <p>问诊时间:{{ record.visit_date }}</p>
+                        <p>问诊科室:{{ record.department }}</p>
+                        <p>患者主诉:{{ record.patient_complaint}}</p>
+                        <p>既往病史:{{ record.medical_history }}</p>
+                        <p>体格检查:{{ record.physical_examination}}</p>
+                        <p>辅助检查:{{ record.auxiliary_examination}}</p>
+                        <p>诊断:{{ record.diagnosis}}</p>
+                        <p>处理意见:{{ record.treatment_advice}}</p>
+                        <p>医生签名:{{ record.doctor_signature}}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+        <p>No medical records now</p>
+        {% endif %}
+                        <p><a href="{{ url_for('patient_bp.pt_home') }}" class = "btn">Back to Home</a></p>
+    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
+    </div>
+
+    <script>
+        function logout() {
+            // 处理退出登录的逻辑
+            window.location.href = "{{ url_for('patient_bp.logout') }}";
+        }
+    </script>
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
 <html>
 <head>
     <title>Medical Records</title>
 </head>
 <body>
     <h2>Medical Records</h2>
+
     <div id="records">
         {% if records %}
             <ul>
@@ -32,8 +127,9 @@
         {% else %}
         <p>No medical records now</p>
         {% endif %}
-
     </div>
+
     <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
 </body>
 </html>
+-->
