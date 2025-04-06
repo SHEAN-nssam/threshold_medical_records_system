@@ -1,10 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medical Records need to be reviewed</title>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
-    <h2>Medical Records not review</h2>
+<div class="container">
+        <header>
+            <h1>医疗系统</h1>
+        </header>
+
+        <div class="content">
+            <div class="sidebar">
+                <h2>功能菜单</h2>
+                <div class="function-buttons">
+                    <a href="{{ url_for('admin_bp.review_list') }}" class="function-button purple">
+                        <h3>审核病历</h3>
+                        <p>审核和管理病历记录</p>
+                    </a>
+
+                </div>
+            </div>
+
+            <div class="main-content">
+
+                <div class="content-area">
+                    <!-- 这里可以放置具体页面的内容 -->
+                     <h2>Medical Records not review</h2>
     <div id="records">
         {% if records %}
             <ul>
@@ -22,8 +46,23 @@
         {% else %}
             <p>No records to review.</p>
         {% endif %}
+            <p><a href="{{ url_for('admin_bp.ad_home') }}" class="btn">Back to Home</a></p>
+    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
     </div>
 
-    <p><a href="{{ url_for('admin_bp.ad_home') }}">Back to Home</a></p>
+    <script>
+        function logout() {
+            // 处理退出登录的逻辑
+            window.location.href = "{{ url_for('admin_bp.logout') }}";
+        }
+    </script>
+
 </body>
 </html>

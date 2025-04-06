@@ -1,3 +1,99 @@
+<!--doctor_revise_medical_record.html 修改被管理员打回的病历 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改病历</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>医疗系统</h1>
+        </header>
+
+        <div class="content">
+            <div class="sidebar">
+                <h2>被管理员打回的病历</h2>
+
+                {% if rejected_records %}
+                    <ul>
+                        {% for record in rejected_records %}
+                            <li>
+                                病历ID: {{ record.mr_id }}
+                                <p>打回原因: {{ record.review_opinions }}</p>
+                                <p>负责管理员: {{ record.review_by }}</p>
+                                <a href="{{ url_for('doctor_bp.revise_medical_record', mr_id=record.mr_id, review_record_id=record.id) }}" class="btn orange-btn">重新提交</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>没有被管理员打回的病历。</p>
+                {% endif %}
+            </div>
+
+            <div class="main-content">
+                <h2>修改病历</h2>
+
+                {% if message %}
+                    <p style="color: {{ 'green' if 'success' in message else 'red' }}">{{ message }}</p>
+                {% endif %}
+
+                {% if review_record %}
+                    <p>病历ID: {{ review_record.mr_id }}</p>
+                    <p>打回原因: {{ review_record.review_opinions }}</p>
+                    <p>负责管理员: {{ review_record.review_by }}</p>
+                {% else %}
+                    <p>审核记录读取错误</p>
+                    <a href="{{ url_for('doctor_bp.request_list') }}">返回列表</a>
+                {% endif %}
+
+                <form method="POST">
+                    <input type="hidden" name="request_id" value="{{ medical_record.consultation_request_id }}">
+
+                    <label for="patient_complaint">Patient Complaint:</label>
+                    <textarea id="patient_complaint" name="patient_complaint" required>{{ medical_record.patient_complaint if medical_record.patient_complaint }}</textarea><br><br>
+
+                    <label for="medical_history">Medical History:</label>
+                    <textarea id="medical_history" name="medical_history">{{ medical_record.medical_history if medical_record.medical_history }}</textarea><br><br>
+
+                    <label for="physical_examination">Physical Examination:</label>
+                    <textarea id="physical_examination" name="physical_examination">{{ medical_record.physical_examination if medical_record.physical_examination }}</textarea><br><br>
+
+                    <label for="auxiliary_examination">Auxiliary Examination:</label>
+                    <textarea id="auxiliary_examination" name="auxiliary_examination">{{ medical_record.auxiliary_examination if medical_record.auxiliary_examination }}</textarea><br><br>
+
+                    <label for="diagnosis">Diagnosis:</label>
+                    <textarea id="diagnosis" name="diagnosis" required>{{ medical_record.diagnosis if medical_record.diagnosis }}</textarea><br><br>
+
+                    <label for="treatment_advice">Treatment Advice:</label>
+                    <textarea id="treatment_advice" name="treatment_advice" required>{{ medical_record.treatment_advice if medical_record.treatment_advice }}</textarea><br><br>
+
+                    <button type="submit" name="action" value="save">Save Draft</button>
+                    <button type="submit" name="action" value="submit">Submit for Review</button>
+                </form>
+
+                <p><a href="{{ url_for('doctor_bp.request_list') }}">Back to Appointments</a></p>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
+    </div>
+
+    <script>
+        function logout() {
+            window.location.href = "{{ url_for('doctor_bp.logout') }}";
+        }
+    </script>
+</body>
+</html>
+
+
+
+<!--
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>

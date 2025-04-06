@@ -278,6 +278,21 @@ footer {
     color: #7b1fa2;
 }
 
+.purple:hover {
+    background: linear-gradient(135deg, #e1bee7 0%, #f3e5f5 100%);
+    color: #7b1fa2;
+}
+
+.purple-btn {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+    border: 1px solid #e1bee7;
+}
+
+.purple-btn:hover {
+    background-color: #e1bee7;
+}
+
 .function-button h3 {
     margin-bottom: 10px;
     font-size: 1.2rem;

@@ -146,7 +146,7 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 if __name__ == '__main__':
     initialize_database()
     #app.run(host='0.0.0.0', port=5000, debug=True)
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True,allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
 
 
 

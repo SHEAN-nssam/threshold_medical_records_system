@@ -1,3 +1,89 @@
+<!--doctor_medical_record.html 书写患者申请的病历的页面-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书写病历</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>医疗系统</h1>
+        </header>
+
+        <div class="content">
+            <div class="sidebar">
+                <h2>已接受的问诊申请</h2>
+                {% if requests %}
+                    <ul>
+                        {% for request in requests %}
+                            <li>
+                                请求ID: {{ request.id }}
+                                <p>患者ID: {{ request.patient_id }}</p>
+                                <p>申请时间: {{ request.request_time }}</p>
+                                <p>状态: {{ request.status }}</p>
+                                <a href="{{ url_for('doctor_bp.medical_record', request_id=request.id) }}" class="btn blue-btn">开始书写病历</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>没有已接受的问诊申请。</p>
+                {% endif %}
+            </div>
+
+            <div class="main-content">
+                <h2>病历记录</h2>
+
+                {% if message %}
+                    <p style="color: {{ 'green' if 'success' in message else 'red' }}">{{ message }}</p>
+                {% endif %}
+
+                <form method="POST">
+                    <input type="hidden" name="request_id" value="{{ medical_record.consultation_request_id }}">
+
+                    <label for="patient_complaint">Patient Complaint:</label>
+                    <textarea id="patient_complaint" name="patient_complaint">{{ medical_record.patient_complaint if medical_record }}</textarea><br><br>
+
+                    <label for="medical_history">Medical History:</label>
+                    <textarea id="medical_history" name="medical_history">{{ medical_record.medical_history if medical_record }}</textarea><br><br>
+
+                    <label for="physical_examination">Physical Examination:</label>
+                    <textarea id="physical_examination" name="physical_examination">{{ medical_record.physical_examination if medical_record }}</textarea><br><br>
+
+                    <label for="auxiliary_examination">Auxiliary Examination:</label>
+                    <textarea id="auxiliary_examination" name="auxiliary_examination">{{ medical_record.auxiliary_examination if medical_record }}</textarea><br><br>
+
+                    <label for="diagnosis">Diagnosis:</label>
+                    <textarea id="diagnosis" name="diagnosis">{{ medical_record.diagnosis if medical_record }}</textarea><br><br>
+
+                    <label for="treatment_advice">Treatment Advice:</label>
+                    <textarea id="treatment_advice" name="treatment_advice">{{ medical_record.treatment_advice if medical_record }}</textarea><br><br>
+
+                    <button type="submit" name="action" value="save">Save Draft</button>
+                    <button type="submit" name="action" value="submit">Submit for Review</button>
+                </form>
+
+                <p><a href="{{ url_for('doctor_bp.request_list') }}">Back to Appointments</a></p>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
+    </div>
+
+    <script>
+        function logout() {
+            window.location.href = "{{ url_for('doctor_bp.logout') }}";
+        }
+    </script>
+</body>
+</html>
+
+<!--
 <!DOCTYPE html>
 <html>
 <head>

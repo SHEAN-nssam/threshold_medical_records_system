@@ -168,7 +168,7 @@ def review_list():
     return render_template('admin_review_list.html', records=me_records)
 
 
-@admin_bp.route('/review_record/<record_id>',methods=['GET','POST'])
+@admin_bp.route('/review_record/<record_id>', methods=['GET','POST'])
 @login_required
 def review_record(record_id):
     message = None

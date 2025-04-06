@@ -366,6 +366,7 @@ def create_medical_record(consultation_request_id):
             connection.close()
     return success
 
+
 def update_medical_record(record_id, patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis, treatment_advice):
     """
     更新病历记录中的详细信息。
@@ -432,7 +433,7 @@ def submit_medical_record(record_id):
 
         doctor_id = medical_record['doctor_id']
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        #签名格式错误，视情况更改
+        # 签名格式错误，待更改
         doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
 
         # 更新病历状态和签名
@@ -523,7 +524,7 @@ def submit_medical_record_by_request(request_id):
 
         doctor_id = medical_record['doctor_id']
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        #签名格式错误，视情况更改
+        # 签名格式错误，待更改
         doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
 
         # 更新病历状态和签名
@@ -538,6 +539,7 @@ def submit_medical_record_by_request(request_id):
             (doctor_signature, request_id)
         )
         connection.commit()
+
         success = True
     except Error as e:
         print(f"Error in submit_medical_record_by_request: {e}")

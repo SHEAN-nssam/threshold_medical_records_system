@@ -1,3 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员主页</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>医疗系统</h1>
+        </header>
+
+        <div class="content">
+            <div class="sidebar">
+                <h2>功能菜单</h2>
+                <div class="function-buttons">
+                    <a href="{{ url_for('admin_bp.review_list') }}" class="function-button purple">
+                        <h3>审核病历</h3>
+                        <p>审核和管理病历记录</p>
+                    </a>
+
+                </div>
+            </div>
+
+            <div class="main-content">
+                <h2>欢迎，管理员 {{ username }}!</h2>
+                <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
+
+                <div class="content-area">
+                    <!-- 这里可以放置具体页面的内容 -->
+                    <p>这是管理员主页内容区域。</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
+    </div>
+
+    <script>
+        function logout() {
+            // 处理退出登录的逻辑
+            window.location.href = "{{ url_for('admin_bp.logout') }}";
+        }
+    </script>
+</body>
+</html>
+
+
+<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>

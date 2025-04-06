@@ -301,6 +301,7 @@ def request_list():
 def medical_record(request_id):
     message = None
     medical_record_data = None
+    requests = get_active_consultation_requests(current_user.id)
     # 检查病历是否存在
     medical_record_data = get_medical_records_by_request(request_id)
     #print(medical_record_data)
@@ -345,7 +346,7 @@ def medical_record(request_id):
             else:
                 message = 'Failed to save draft before submission.'
 
-    return render_template('doctor_medical_record.html', medical_record=medical_record_data, message=message)
+    return render_template('doctor_medical_record.html', requests=requests, medical_record=medical_record_data, message=message)
 
 
 # 修改病历功能
@@ -353,6 +354,7 @@ def medical_record(request_id):
 def revise_medical_record(mr_id, review_record_id):
     message = None
     medical_record_data = None
+    rejected_records = get_records_correct(current_user.id)
     review_record_data = get_review_record(review_record_id)
     # 检查病历是否存在
     medical_record_data = get_medical_record(mr_id)
@@ -387,7 +389,7 @@ def revise_medical_record(mr_id, review_record_id):
                     message = 'Failed to submit medical record.'
             else:
                 message = 'Failed to save draft before submission.'
-    return render_template("doctor_revise_medical_record.html", message=message, review_record=review_record_data, medical_record=medical_record_data)
+    return render_template("doctor_revise_medical_record.html", rejected_records=rejected_records, message=message, review_record=review_record_data, medical_record=medical_record_data)
 
 
 # 注销功能

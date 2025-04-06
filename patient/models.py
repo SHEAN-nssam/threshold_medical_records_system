@@ -217,7 +217,7 @@ def get_medical_records(user_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT * FROM medical_records WHERE patient_id = %s ORDER BY created_at DESC",
+            "SELECT * FROM medical_records WHERE patient_id = %s and status = 'ap' ORDER BY created_at DESC",
             (user_id,)
         )
         mr = cursor.fetchall()
