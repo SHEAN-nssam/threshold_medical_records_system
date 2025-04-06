@@ -4,53 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>医疗记录管理</title>
-    <link rel="stylesheet" href="/static/css/doctor_medical_records_list.css">
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
     <div class="container">
-        <div class="left-column">
-            <h2>已接受的问诊申请</h2>
+        <header>
+            <h1>医疗系统</h1>
+        </header>
 
-            <div id="requests">
-                {% if requests %}
-                    <ul>
-                        {% for request in requests %}
-                            <li>
-                                请求ID: {{ request.id }}
-                                <p>患者ID: {{ request.patient_id }}</p>
-                                <p>申请时间: {{ request.request_time }}</p>
-                                <p>状态: {{ request.status }}</p>
-                                <a href="{{ url_for('doctor_bp.medical_record', request_id=request.id) }}">开始书写病历</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>没有已接受的问诊申请。</p>
-                {% endif %}
+        <div class="content">
+            <div class="sidebar">
+                <h2>功能菜单</h2>
+                <div class="function-buttons">
+                    <a href="{{ url_for('doctor_bp.display_profile') }}" class="function-button blue">
+                        <h3>个人信息</h3>
+                    </a>
+                    <a href="{{ url_for('doctor_bp.view_appointments') }}" class="function-button green">
+                        <h3>接诊</h3>
+                    </a>
+                    <a href="{{ url_for('doctor_bp.request_list') }}" class="function-button orange">
+                        <h3>检查申请-书写病历</h3>
+                    </a>
+                </div>
+            </div>
+
+            <div class="main-content">
+
+                <div class="content-area">
+                    <div class="requests-container">
+                        <div class="left-column">
+                            <h2>已接受的问诊申请</h2>
+
+                            <div id="requests">
+                                {% if requests %}
+                                    <ul>
+                                        {% for request in requests %}
+                                            <li>
+                                                请求ID: {{ request.id }}
+                                                <p>患者ID: {{ request.patient_id }}</p>
+                                                <p>申请时间: {{ request.request_time }}</p>
+                                                <p>状态: {{ request.status }}</p>
+                                                <a href="{{ url_for('doctor_bp.medical_record', request_id=request.id) }}" class="btn blue-btn">开始书写病历</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>没有已接受的问诊申请。</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="right-column">
+                            <h2>被管理员打回的病历</h2>
+
+                            <div id="rejected_records">
+                                {% if rejected_records %}
+                                    <ul>
+                                        {% for record in rejected_records %}
+                                            <li>
+                                                病历ID: {{ record.mr_id }}
+                                                <p>打回原因: {{ record.review_opinions }}</p>
+                                                <a href="{{ url_for('doctor_bp.revise_medical_record', mr_id=record.mr_id, review_record_id=record.id) }}" class="btn orange-btn">重新提交</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>没有被管理员打回的病历。</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="right-column">
-            <h2>被管理员打回的病历</h2>
-
-            <div id="rejected_records">
-                {% if rejected_records %}
-                    <ul>
-                        {% for record in rejected_records %}
-                            <li>
-                                病历ID: {{ record.mr_id }}
-                                <p>打回原因: {{ record.review_opinions }}</p>
-                                <a href="{{ url_for('doctor_bp.revise_medical_record', mr_id=record.mr_id, review_record_id=record.id) }}">重新提交</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>没有被管理员打回的病历。</p>
-                {% endif %}
-            </div>
-        </div>
+        <footer>
+            <button class="btn" onclick="logout()">退出登录</button>
+        </footer>
     </div>
- <p><a href="{{ url_for('doctor_bp.dc_home') }}">Back to Home</a></p>
+
+    <script>
+        function logout() {
+            // 处理退出登录的逻辑
+            window.location.href = "{{ url_for('doctor_bp.logout') }}";
+        }
+    </script>
 </body>
 </html>
 

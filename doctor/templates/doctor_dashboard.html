@@ -1,3 +1,4 @@
+<!--doctor_dashboard.html-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -16,9 +17,9 @@
         <div class="sidebar">
 <h2>功能菜单</h2>
              <div class="function-buttons">
-                 <a href="{{ url_for('doctor_bp.display_profile') }}" class="function-button blue"><h3>Personal Information</h3></a>
-    <a href="{{ url_for('doctor_bp.view_appointments') }}" class="function-button green"><h3>Appointments</h3></a>
-                 <a href="{{ url_for('doctor_bp.request_list') }}" class="function-button orange"><h3>check request</h3></a>
+                 <a href="{{ url_for('doctor_bp.display_profile') }}" class="function-button blue"><h3>个人信息</h3></a>
+                 <a href="{{ url_for('doctor_bp.view_appointments') }}" class="function-button green"><h3>接诊</h3></a>
+                 <a href="{{ url_for('doctor_bp.request_list') }}" class="function-button orange"><h3>检查申请-书写病历</h3></a>
         </div>
 </div>
         <div class="main-content">
@@ -34,6 +35,7 @@
                     <p>这是主页内容区域。</p>
                 </div>
         </div>
+
     </div>
 
      <footer>

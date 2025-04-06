@@ -33,13 +33,19 @@ def create_patient_login(user_id, username, password_hash):
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
+        connection.start_transaction()
+
         # 插入患者登录信息
         cursor.execute("INSERT INTO patients (id, username, password) VALUES (%s, %s, %s)",
                        (user_id, username, password_hash))
         # 提交事务
         connection.commit()
+
         return True
     except Error as e:
+        # 回滚事务
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_patient_login_Error: {e}")
         return False
@@ -78,13 +84,18 @@ def create_patient_profile(user_id, full_name, gender, birth_date):
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
+        connection.start_transaction()
+
         # 插入患者个人信息
         cursor.execute("INSERT INTO patient_profiles (id, full_name, gender, birth_date) VALUES (%s, %s, %s, %s)",
                        (user_id, full_name, gender, birth_date))
         # 提交事务
         connection.commit()
+
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_patient_profile_Error: {e}")
         return False
@@ -97,6 +108,7 @@ def create_patient_profile(user_id, full_name, gender, birth_date):
 # 编写方法使患者可以获得在线的医生列表（进阶：最好可以按照科室划分
 # 从doctors表（医生登录表）获取在线医生的id（is_online=1），再由id查阅doctor_profiles表，获取在线医生的信息
 # 将在线医生的信息（字典数组）整合后，可以达成按照科室划分分别查看的效果
+
 
 def get_online_doctors():
     """
@@ -147,6 +159,8 @@ def create_consultation_request(patient_id, doctor_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        connection.start_transaction()
+
         cursor.execute(
             "INSERT INTO consultation_requests (patient_id, doctor_id, status, request_time) VALUES (%s, %s, %s, %s)",
             (patient_id, doctor_id, 'pending', current_time)
@@ -154,6 +168,8 @@ def create_consultation_request(patient_id, doctor_id):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in create_consultation_request: {e}")
     finally:
         if connection and connection.is_connected():
