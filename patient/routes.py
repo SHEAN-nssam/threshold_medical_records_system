@@ -3,7 +3,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
-from config import db_config, User,calcu_age
+from config import User, calcu_age
 from patient.models import *
 from flask_socketio import SocketIO
 

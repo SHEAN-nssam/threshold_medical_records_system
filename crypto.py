@@ -264,23 +264,34 @@ def generate_pbkdf2_key(password, salt, iterations=10000, key_length=16):
 if __name__ == "__main__":
 
 # 示例用法
-    data = "Hello,here is 120.你好这里是120"
 
     #salt = b"5209f6f54f0a74a45090e9e306c5d78e"
+    data = "Hello,here is 120.你好这里是120"
     salt = generate_salt()
-    print(salt)
-    print(generate_salt_sm3("123456",salt))
-    print("sm4key:",generate_sm4_key())
+    print("明文：", data)
+    print("随机盐值：", salt)
+    print("SM3哈希值：",generate_sm3_hash(data))
+    print("加盐SM3哈希值：", generate_salt_sm3("123456", salt))
+    prikey, pubkey = generate_sm2_key_pair()
+    print("SM2私钥：", prikey)
+    print("SM2公钥：", pubkey)
+    print("SM2加密：", sm2_encrypt(data,pubkey))
+    print("SM2解密：", sm2_decrypt(sm2_encrypt(data, pubkey), prikey))
+    sign=sm2_sign(data, prikey)
+    print("SM2签名：", sign)
+    print("SM2验签：", sm2_verify(sign, data, pubkey))
 
     # 生成密钥
     key = generate_sm4_key()
-    print("生成的密钥:", key)
-
+    print("生成SM4密钥:", key)
+    #print("sm4key:",generate_sm4_key())
+''' 
     # 加密
     plaintext = "Hello, SM4!"
     ciphertext = sm4_encrypt(data, key)
-    print("加密后的密文:", ciphertext)
+    print("SM4加密后:", ciphertext)
 
     # 解密
     decrypted_text = sm4_decrypt(ciphertext, key)
-    print("解密后的明文:", decrypted_text.decode())
+    print("SM4解密后:", decrypted_text.decode())
+'''
