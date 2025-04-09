@@ -258,7 +258,7 @@ def respond_request(request_id, action):
     requests = get_consultation_requests(current_user.id)
     return render_template('doctor_appointments.html', requests=requests, message=message)
 
-
+'''
 # 医生结束问诊
 @doctor_bp.route('/end_consultation/<int:request_id>', methods=['POST'])
 @login_required
@@ -277,16 +277,7 @@ def end_consultation(request_id):
         message = 'Failed to end consultation.'
     requests = get_consultation_requests(current_user.id)
     return render_template('doctor_appointments.html', requests=requests, message=message)
-
-
 '''
-# 医生书写病历
-@doctor_bp.route('/write_medical_record')
-@login_required
-def write_medical_record():
-    return render_template('doctor_write_medical_record.html')
-'''
-
 
 @doctor_bp.route('/medical_records')
 @login_required
@@ -345,9 +336,28 @@ def medical_record(request_id):
                     message = 'Failed to submit medical record.'
             else:
                 message = 'Failed to save draft before submission.'
+            if end_consultation(request_id):
+                message = message + "  "+"Consultation ended successfully."
+            else:
+                message = message + "  "+"Failed to end consultation."
 
-    return render_template('doctor_medical_record.html', requests=requests, medical_record=medical_record_data, message=message)
+    return render_template('doctor_medical_record.html', requests=requests,
+                           medical_record=medical_record_data, message=message)
 
+
+def end_consultation(request_id):
+    success = False
+    if update_consultation_request(request_id, 'completed'):
+        # 发送通知给患者
+        patient_id = get_patient_id(request_id)
+        add_notification(patient_id, request_id, 'completed')
+        socketio = current_app.extensions['socketio']
+        # 通过 WebSocket 通知患者
+        socketio.emit('consultation_ended', {'request_id': request_id}, room=f'patient_{get_patient_id(request_id)}')
+        success = True
+    else:
+        pass
+    return success
 
 # 修改病历功能
 @doctor_bp.route('/medical_records_revise/<int:mr_id>/<int:review_record_id>', methods=['GET', 'POST'])

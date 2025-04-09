@@ -54,16 +54,13 @@
                             <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='reject') }}">
                                 <button type="submit">Reject</button>
                             </form>
-                        {% elif request.status == 'accepted' %}
-                            <form method="POST" action="{{ url_for('doctor_bp.end_consultation', request_id=request.id) }}">
-                                <button type="submit">End Consultation</button>
-                            </form>
+
                         {% endif %}
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No pending or accepted requests.</p>
+            <p>No pending requests.</p>
         {% endif %}
                        <p><a href="{{ url_for('doctor_bp.dc_home') }}" class="btn">Back to Home</a></p>
     </div>
@@ -84,3 +81,4 @@
     </script>
 </body>
 </html>
+
