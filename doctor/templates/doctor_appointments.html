@@ -23,62 +23,57 @@
     <header>
             <h1>医疗系统</h1>
     </header>
-
      <div class="content">
-        <div class="sidebar">
-<h2>功能菜单</h2>
+         <div class="sidebar">
+             <h2>功能菜单</h2>
              <div class="function-buttons">
                  <a href="{{ url_for('doctor_bp.display_profile') }}" class="function-button blue"><h3>个人信息</h3></a>
                  <a href="{{ url_for('doctor_bp.view_appointments') }}" class="function-button green"><h3>接诊</h3></a>
                  <a href="{{ url_for('doctor_bp.request_list') }}" class="function-button orange"><h3>检查申请-书写病历</h3></a>
-        </div>
-</div>
+             </div>
+         </div>
 
-<div class="main-content">
-<h2>Appointments</h2>
-
+         <div class="main-content">
+             <h2>Appointments</h2>
              <div class="content-area">
-                    <!-- 这里可以放置具体页面的内容 -->
-                   <div id="requests">
-        {% if requests %}
-            <ul>
-                {% for request in requests %}
-                    <li>
-                        Request ID: {{ request.formatted_id }}
-                        Patient ID: {{ request.patient_id }}
-                        <p>Status: {{ request.status }}</p>
-                        {% if request.status == 'pending' %}
-                            <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='accept') }}">
-                                <button type="submit">Accept</button>
-                            </form>
-                            <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='reject') }}">
-                                <button type="submit">Reject</button>
-                            </form>
-
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No pending requests.</p>
-        {% endif %}
-                       <p><a href="{{ url_for('doctor_bp.dc_home') }}" class="btn">Back to Home</a></p>
-    </div>
-                </div>
-        </div>
-
-
+             <!-- 这里可以放置具体页面的内容 -->
+                 <div id="requests">
+                     {% if requests %}
+                     <ul>
+                         {% for request in requests %}
+                         <li>
+                             Request ID: {{ request.formatted_id }}
+                             Patient ID: {{ request.patient_id }}
+                             <p>Status: {{ request.status }}</p>
+                             {% if request.status == 'pending' %}
+                             <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='accept') }}">
+                                 <button type="submit">Accept</button>
+                             </form>
+                             <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='reject') }}">
+                                 <button type="submit">Reject</button>
+                             </form>
+                             {% endif %}
+                         </li>
+                         {% endfor %}
+                     </ul>
+                     {% else %}
+                     <p>No pending requests.</p>
+                     {% endif %}
+                     <p><a href="{{ url_for('doctor_bp.dc_home') }}" class="btn">Back to Home</a></p>
+                 </div>
+             </div>
+         </div>
      </div>
-<footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
+    <footer>
+        <button class="btn" onclick="logout()">退出登录</button>
+    </footer>
 </div>
 <script>
         function logout() {
             // 处理退出登录的逻辑
             window.location.href = "{{ url_for('patient_bp.logout') }}";
         }
-    </script>
+</script>
 </body>
 </html>
 
