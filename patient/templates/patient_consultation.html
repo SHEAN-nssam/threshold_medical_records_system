@@ -53,7 +53,7 @@
                             <li>
                                 {{ doctor.department }} - {{ doctor.full_name }} - {{ doctor.title }}
                                 <form method="POST" action="{{ url_for('patient_bp.send_request', doctor_id=doctor.id) }}">
-                                    <button type="submit">Send Request</button>
+                                    <button type="button" id="openModal" class="send-request-btn" data-doctor-id="{{ doctor.id }}">Send Request</button> <!--打开弹窗的按钮-->
                                 </form>
                             </li>
                         {% endfor %}
@@ -64,6 +64,18 @@
                     <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">Back to Home</a></p>
                 </div>
             </div>
+
+            <!-- 弹窗部分代码-->
+        <div id="myModal" class="modal"> <!-- modal元素使用-->
+            <div class="modal-content">
+                <span class="close">&times;</span> <!-- closeBtn元素使用 -->
+                <h2>请输入密码以发送问诊申请</h2>
+                <!--下方userInput元素使用-->
+                <input type="text" id="userInput" placeholder="在这里输入文字...">
+                <button id="submitBtn">提交</button> <!--submitBtn元素使用-->
+            </div>
+        </div>
+
         </div>
 
         <footer>
@@ -75,6 +87,70 @@
         function logout() {
             // 处理退出登录的逻辑
             window.location.href = "{{ url_for('patient_bp.logout') }}";
+        }
+
+        // 获取DOM元素
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("openModal");
+        var closeBtn = document.getElementsByClassName("close")[0];
+        var submitBtn = document.getElementById("submitBtn");
+        var userInput = document.getElementById("userInput");
+
+        // 存储当前选中的医生ID
+        let currentDoctorId = null;
+        // 为每个 "Send Request" 按钮添加点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendRequestBtns = document.querySelectorAll('.send-request-btn');
+            sendRequestBtns.forEach(btn => {
+                btn.addEventListener('click', function(event) {
+                    event.preventDefault(); // 阻止表单提交
+                    currentDoctorId = this.getAttribute('data-doctor-id');
+                    modal.style.display = "block";
+                });
+            });
+        });
+        /*
+        // 点击按钮打开弹窗
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }*/
+
+        // 点击关闭按钮关闭弹窗
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // 点击提交按钮处理输入
+        submitBtn.onclick = async function() {
+            var inputText = userInput.value.trim();
+            if (inputText) {
+                try {
+                    // 使用AJAX请求将输入发送到后端
+                    const response = await fetch(`/patient/send_request/${currentDoctorId}`, {  //后端路由名
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ input: inputText })
+                    });
+
+                    // 关闭弹窗并清空输入框
+                    modal.style.display = "none";
+                    userInput.value = "";
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('提交失败，请重试！');
+                }
+            } else {
+                alert("请输入内容！");
+            }
+        }
+
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
         }
     </script>
 </body>

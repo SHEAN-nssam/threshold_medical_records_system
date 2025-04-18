@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 from config import db_config
 from datetime import datetime
+from crypto import *
 
 # 获取患者登录信息
 def get_patient_login(username):
@@ -12,7 +13,7 @@ def get_patient_login(username):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         # 查询患者登录信息
-        cursor.execute("SELECT id, username, password FROM patients WHERE username = %s ", (username,))
+        cursor.execute("SELECT * FROM patients WHERE username = %s ", (username,))
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
@@ -27,7 +28,7 @@ def get_patient_login(username):
 
 
 # 创建患者登录信息
-def create_patient_login(user_id, username, password_hash):
+def create_patient_login(user_id, username, password_hash, salt, akey, bkey):
     connection = None;cursor = None
     try:
         # 连接数据库
@@ -36,8 +37,8 @@ def create_patient_login(user_id, username, password_hash):
         connection.start_transaction()
 
         # 插入患者登录信息
-        cursor.execute("INSERT INTO patients (id, username, password) VALUES (%s, %s, %s)",
-                       (user_id, username, password_hash))
+        cursor.execute("INSERT INTO patients (id, username, password, sa, a_key, b_key) VALUES (%s, %s, %s, %s, %s, %s)",
+                       (user_id, username, password_hash, salt, akey, bkey))
         # 提交事务
         connection.commit()
 
@@ -55,6 +56,29 @@ def create_patient_login(user_id, username, password_hash):
             cursor.close()
             connection.close()
 
+def get_patient_akey(patient_id,password):
+    connection = None
+    cursor = None
+    akey = None
+    try:
+        # 连接数据库
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        # 查询登录信息
+        cursor.execute("SELECT id,sa,a_key FROM patients WHERE id = %s ", (patient_id,))
+        result = cursor.fetchone()
+        salt = result['sa']
+        tkey = generate_pbkdf2_key(password, salt)
+        akey = sm4_decrypt(result['a_key'], tkey)
+    except Error as e:
+        # 打印错误信息
+        print(f"models_get_patient_akey_Error: {e}")
+    finally:
+        # 关闭数据库连接
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return akey
 
 def get_patient_profile(user_id):
     connection = None;cursor = None
@@ -150,8 +174,27 @@ def get_online_doctors():
 
     return online_doctors
 
+def get_doctor_key(doc_id):
+    connection = None
+    cursor = None
+    dkey = None
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
 
-def create_consultation_request(patient_id, doctor_id):
+        # 获取所有在线医生的ID
+        cursor.execute("SELECT b_key FROM doctors WHERE id = %s", (doc_id,))
+        dkey = cursor.fetchone()
+    except Error as e:
+        print(f"Error in get_online_doctors: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return dkey
+
+
+def create_consultation_request(patient_id, doctor_id, sign):
     connection = None
     cursor = None
     success = False
@@ -162,8 +205,8 @@ def create_consultation_request(patient_id, doctor_id):
         connection.start_transaction()
 
         cursor.execute(
-            "INSERT INTO consultation_requests (patient_id, doctor_id, status, request_time) VALUES (%s, %s, %s, %s)",
-            (patient_id, doctor_id, 'pending', current_time)
+            "INSERT INTO consultation_requests (patient_id, doctor_id, status, request_time, sign) VALUES (%s, %s, %s, %s,%s)",
+            (patient_id, doctor_id, 'pending', current_time, sign)
         )
         connection.commit()
         success = True

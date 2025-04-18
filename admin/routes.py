@@ -5,6 +5,7 @@ import mysql.connector
 from mysql.connector import Error
 from config import db_config, User  # 假设 User 类在 app.py 中定义
 from admin.models import *
+from crypto import *
 # 创建蓝prints
 admin_bp = Blueprint('admin_bp', __name__, template_folder='templates')
 
@@ -24,8 +25,11 @@ def login():
             if results is None:
                 message = 'Username not found. Please register first.'
             else:
-                stored_password = results['password'].decode('utf-8')
-                if check_password_hash(stored_password, password):
+                # stored_password = results['password'].decode('utf-8')
+                stored_password = results['password']
+                sa = results['sa']
+                # if check_password_hash(stored_password, password):
+                if check_salt_sm3(password, sa, stored_password):
                     user = User(results['id'], results['username'], 'patient')
                     login_user(user)
                     return redirect(url_for('admin_bp.ad_home'))
@@ -35,35 +39,6 @@ def login():
             print(f"routes_admin_login_Error: {e}")
             message = 'Login failed. Please try again.'
 
-        '''
-        connection = None
-        cursor = None
-        try:
-            connection = mysql.connector.connect(**db_config)
-            cursor = connection.cursor()
-
-            cursor.execute("SELECT id, username, password FROM admins WHERE username = %s", (username,))
-            admin_user = cursor.fetchone()
-
-            if admin_user:
-                stored_password = admin_user[2].decode('utf-8')
-                if check_password_hash(stored_password, password):
-                    user = User(admin_user[0], admin_user[1], 'admin')
-                    login_user(user)
-                    return redirect(url_for('admin_bp.ad_home'))
-                else:
-                    message = 'Invalid password. Please try again.'
-            else:
-                message = 'Username not found. Please register first.'
-
-        except Error as e:
-            print(f"admin_login_Error: {e}")
-            message = 'Login failed. Please try again.'
-        finally:
-            if connection and connection.is_connected():
-                cursor.close()
-                connection.close()
-    '''
     return render_template('admin_login.html', message=message)
 
 
@@ -74,9 +49,13 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        hashed_password = generate_password_hash(password).encode('utf-8')
-
-        # change
+        # hashed_password = generate_password_hash(password).encode('utf-8')
+        sa = generate_salt()
+        hashed_password = generate_salt_sm3(password, sa)
+        akey, bkey = generate_sm2_key_pair()
+        tkey = generate_pbkdf2_key(password, sa)
+        akey = sm4_encrypt(akey, tkey)
+        del tkey
         try:
             results = get_admin_login(username)
             #print(results['id'], results['username'], results['password'])
@@ -84,7 +63,7 @@ def register():
                 message = 'Username already exists. Please choose a different one.'
                 return render_template('admin_register.html', message=message)
 
-            if create_admin_login(generate_admin_id(), username, hashed_password):
+            if create_admin_login(generate_admin_id(), username, hashed_password, sa, akey, bkey):
                 message = 'Registration successful! Please login.'
                 return render_template('admin_register.html', message=message)
             else:
@@ -93,36 +72,7 @@ def register():
         except Error as e:
             print(f"routes_admin_login_Error: {e}")
             message = 'Registration failed. Please try again.'
-        '''
-        connection = None
-        cursor = None
-        try:
-            connection = mysql.connector.connect(**db_config)
-            cursor = connection.cursor()
 
-            cursor.execute("SELECT id FROM admins WHERE username = %s", (username,))
-            existing_user = cursor.fetchone()
-
-            if existing_user:
-                message = 'Username already exists. Please choose a different one.'
-                return render_template('patient_register.html', message=message)
-
-            cursor.execute("INSERT INTO admins (id, username, password) VALUES (%s, %s, %s)",
-                           (generate_admin_id(), username, hashed_password))
-                           # (generate_user_id('admin'), username, hashed_password))
-            connection.commit()
-
-            message = 'Registration successful! Please login.'
-            return render_template('patient_register.html', message=message)
-
-        except Error as e:
-            print(f"admin_register_Error: {e}")
-            message = 'Registration failed. Please try again.'
-        finally:
-            if connection and connection.is_connected():
-                cursor.close()
-                connection.close()
-    '''
     return render_template('admin_register.html', message=message)
 
 

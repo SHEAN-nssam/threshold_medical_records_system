@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+# doctor\routes.py
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
@@ -6,8 +7,7 @@ from mysql.connector import Error
 from config import db_config, User, calcu_age  # 假设 User 类在 app.py 中定义
 from doctor.models import *
 from flask_socketio import SocketIO, emit
-
-# from app_run import socketio  # 从主应用导入 socketio 实例
+from crypto import *
 # 创建蓝prints
 doctor_bp = Blueprint('doctor_bp', __name__, template_folder='templates')
 
@@ -27,10 +27,16 @@ def login():
             if results is None:
                 message = 'Username not found. Please register first.'
             else:
-                stored_password = results['password'].decode('utf-8')
-                if check_password_hash(stored_password, password):
-                    user = User(results['id'], results['username'], 'patient')
+                stored_password = results['password']
+                sa = results['sa']
+                if check_salt_sm3(password,sa,stored_password):
+                    user = User(results['id'], results['username'], 'doctor')
                     login_user(user)
+
+                    # 将医生的登录信息存储到 session 中
+                    session['doctor_id'] = results['id']
+                    session['doctor_username'] = results['username']
+                    session['pw'] = password
 
                     if set_doctor_online(results['id']):
                         # print(f"doctor{results['username']} login successfully")
@@ -45,37 +51,7 @@ def login():
             print(f"routes_doctor_login_Error: {e}")
             message = 'Login failed. Please try again.'
             # return redirect(url_for('patient_bp.login'))
-        '''   
-        connection = None
-        cursor = None
-        try:
-            connection = mysql.connector.connect(**db_config)
-            cursor = connection.cursor()
 
-            cursor.execute("SELECT id, username, password FROM doctors WHERE username = %s", (username,))
-            doctor_user = cursor.fetchone()
-
-            if doctor_user:
-                stored_password = doctor_user[2].decode('utf-8')
-                if check_password_hash(stored_password, password):
-                    user = User(doctor_user[0], doctor_user[1], 'doctor')
-                    login_user(user)
-                    return redirect(url_for('doctor_bp.dc_home'))
-                else:
-                    message = 'Invalid password. Please try again.'
-            else:
-                message = 'Username not found. Please register first.'
-            #return redirect(url_for('doctor_bp.login'))
-
-        except Error as e:
-            print(f"doctor_login_Error: {e}")
-            message = 'Login failed. Please try again.'
-            #return redirect(url_for('doctor_bp.login'))
-        finally:
-            if connection and connection.is_connected():
-                cursor.close()
-                connection.close()
-    '''
     return render_template('doctor_login.html', message=message)
 
 
@@ -86,8 +62,13 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        hashed_password = generate_password_hash(password).encode('utf-8')
-
+        # hashed_password = generate_password_hash(password).encode('utf-8')
+        sa = generate_salt()
+        hashed_password = generate_salt_sm3(password, sa)
+        akey, bkey = generate_sm2_key_pair()  # 此处密钥对是十六进制字符串
+        tkey = generate_pbkdf2_key(password, sa)
+        akey = sm4_encrypt(akey, tkey)  # 此处加密后的私钥是bytes
+        del tkey
         # change
         try:
             results = get_doctor_login(username)
@@ -96,7 +77,7 @@ def register():
                 message = 'Username already exists. Please choose a different one.'
                 return render_template('doctor_register.html', message=message)
 
-            if create_doctor_login(generate_doctor_id(), username, hashed_password):
+            if create_doctor_login(generate_doctor_id(), username, hashed_password, sa, akey, bkey):
                 message = 'Registration successful! Please login.'
                 return render_template('doctor_register.html', message=message)
             else:
@@ -105,36 +86,7 @@ def register():
         except Error as e:
             print(f"routes_doctor_login_Error: {e}")
             message = 'Registration failed. Please try again.'
-        '''
-        connection = None
-        cursor = None
-        try:
-            connection = mysql.connector.connect(**db_config)
-            cursor = connection.cursor()
 
-            cursor.execute("SELECT id FROM doctors WHERE username = %s", (username,))
-            existing_user = cursor.fetchone()
-
-            if existing_user:
-                message = 'Username already exists. Please choose a different one.'
-                return render_template('patient_register.html', message=message)
-
-            cursor.execute("INSERT INTO doctors (id, username, password) VALUES (%s, %s, %s)",
-                           (generate_doctor_id(), username, hashed_password))
-                           # (generate_user_id('doctor'), username, hashed_password, department))
-            connection.commit()
-
-            message = 'Registration successful! Please login.'
-            return render_template('patient_register.html', message=message)
-
-        except Error as e:
-            print(f"doctor_register_Error: {e}")
-            message = 'Registration failed. Please try again.'
-        finally:
-            if connection and connection.is_connected():
-                cursor.close()
-                connection.close()
-    '''
     return render_template('doctor_register.html', message=message)
 
 
@@ -169,6 +121,10 @@ def generate_doctor_id():
 @doctor_bp.route('/home', methods=['GET', 'POST'])
 @login_required
 def dc_home():
+    # 从 session 中获取医生的登录信息
+    doctor_id = session.get('doctor_id')
+    doctor_username = session.get('doctor_username')
+    password = session.get('pw')
     profile_data = get_doctor_profile(current_user.id)
 
     # return render_template('doctor_dashboard.html', username=current_user.username)
@@ -230,11 +186,41 @@ def appointments():
 @login_required
 def view_appointments():
     requests = get_consultation_requests(current_user.id)
-    if requests:
-        print(requests)
+    password = session.get('pw')
+    dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+    dc_akey = dc_akey.decode()
+    print("医生解密用的私钥", type(dc_akey), dc_akey)
+    viewed_requests = []
+    for request in requests:
+        # 获取患者id
+        print("sm2解密前：",type(request['patient_id']),request['patient_id'])
+        patient_id = sm2_decrypt(request['patient_id'], dc_akey)
+        print("sm2解密后：",type(patient_id),patient_id)
+        patient_id = int(patient_id.decode())
+
+        # 通过患者id获取公钥并校验签名
+        pt_bkey = get_patient_key(patient_id)['b_key']
+        #pt_bkey = pt_bkey.encode() # 会触发错误报告
+        to_sign = str(patient_id + current_user.id)
+        sign = sm2_decrypt(request['sign'], dc_akey)
+        sign = bytes_hexstr(sign)
+        # print(sign)
+        print("医生获取的解密签名：",type(sign), sign)
+        print("医生校验签名使用的患者公钥：", type(pt_bkey), pt_bkey)
+        print("医生校验签名使用的消息：",type(to_sign), to_sign)
+        sign_result = sm2_verify(sign, to_sign, pt_bkey)
+        print(sign_result)
+        if sign_result is True:
+            request['patient_id'] = patient_id
+            viewed_requests.append(request)
+        else:
+            print(f"{sign_result}，{request['id']}申请，签名未通过")
+    if viewed_requests:
+        print(viewed_requests)
     else:
-        print("no request")
-    return render_template('doctor_appointments.html', requests=requests)
+        print("无合法申请")
+    del dc_akey
+    return render_template('doctor_appointments.html', requests=viewed_requests)
 
 
 # 医生接受或拒绝问诊申请
@@ -410,42 +396,14 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
 '''
-# 生成用户 ID
-def generate_user_id(user_type):
-    connection = None
-    cursor = None
-    new_id = None
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
+if __name__ == '__main__':
+    user = User(20000001, '李四', 'patient')
+    login_user(user)
 
-        if user_type == 'admin':
-            prefix = 10000000
-            table_name = 'admins'
-        elif user_type == 'doctor':
-            prefix = 20000000
-            table_name = 'doctors'
-        elif user_type == 'patient':
-            prefix = 30000000
-            table_name = 'patients'
-        else:
-            return None
-        cursor.execute(f"SELECT MAX(id) FROM {table_name}")
-        result = cursor.fetchone()
-
-        if result and result[0]:
-            current_id = result[0]
-        else:
-            current_id = prefix
-        new_id = current_id + 1
-    except Error as e:
-        print(f"Error: {e}")
-        new_id = None
-    finally:
-        if connection and connection.is_connected():
-            cursor.close()
-            connection.close()
-    return new_id
+    # 将医生的登录信息存储到 session 中
+    session['doctor_id'] = 20000001
+    session['doctor_username'] = '李四'
+    session['pw'] = '789456'
+    view_appointments()
 '''

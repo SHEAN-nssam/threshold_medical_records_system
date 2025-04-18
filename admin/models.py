@@ -10,7 +10,7 @@ def get_admin_login(username):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         # 查询患者登录信息
-        cursor.execute("SELECT id, username, password FROM admins WHERE username = %s ", (username,))
+        cursor.execute("SELECT * FROM admins WHERE username = %s ", (username,))
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
@@ -25,15 +25,15 @@ def get_admin_login(username):
 
 
 # 创建登录信息
-def create_admin_login(user_id, username, password_hash):
+def create_admin_login(user_id, username, password_hash, salt, akey, bkey):
     connection = None;cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
         # 插入患者登录信息
-        cursor.execute("INSERT INTO admins (id, username, password) VALUES (%s, %s, %s)",
-                       (user_id, username, password_hash))
+        cursor.execute("INSERT INTO admins (id, username, password, sa, a_key, b_key) VALUES (%s, %s, %s, %s, %s, %s)",
+                       (user_id, username, password_hash, salt, akey, bkey))
         # 提交事务
         connection.commit()
         return True

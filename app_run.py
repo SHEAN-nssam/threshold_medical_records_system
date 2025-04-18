@@ -1,4 +1,4 @@
-from flask import Flask,render_template, request, redirect, url_for
+from flask import Flask,render_template, jsonify,request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import json
 import mysql.connector
@@ -6,7 +6,8 @@ from mysql.connector import Error
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # 设置密钥
+app.secret_key = 'qwertyuiopasdfghjklzxcvbnm--qazwsxedcrfvtgbyhnujmikolp'  # 设置密钥
+#os.urandom(24)
 
 # 初始化 SocketIO 并存储在 app.extensions 中
 socketio = SocketIO(app)

@@ -1,11 +1,12 @@
+# patient\routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
 from config import User, calcu_age
 from patient.models import *
 from flask_socketio import SocketIO
+from crypto import *
 
 #from app_run import socketio  # 从主应用导入 socketio 实例
 # 创建蓝prints
@@ -26,8 +27,11 @@ def login():
             if results is None:
                 message = 'Username not found. Please register first.'
             else:
-                stored_password = results['password'].decode('utf-8')
-                if check_password_hash(stored_password, password):
+                #stored_password = results['password'].decode('utf-8')
+                stored_password = results['password']
+                sa = results['sa']
+                # if check_password_hash(stored_password, password):
+                if check_salt_sm3(password,sa,stored_password):
                     user = User(results['id'], results['username'], 'patient')
                     login_user(user)
                     return redirect(url_for('patient_bp.pt_home'))
@@ -48,17 +52,22 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        hashed_password = generate_password_hash(password).encode('utf-8')
-
-        # 如果使用models文件的函数，在此处插入
+        #hashed_password = generate_password_hash(password).encode('utf-8')
+        sa = generate_salt()
+        hashed_password = generate_salt_sm3(password, sa)
+        akey, bkey = generate_sm2_key_pair()
+        tkey = generate_pbkdf2_key(password, sa)
+        akey = sm4_encrypt(akey, tkey)
+        del tkey
+        # generate_patient_id(), username, hashed_password, sa, akey, bkey
         try:
             results = get_patient_login(username)
             #print(results['id'], results['username'], results['password'])
             if results is not None:
                 message = 'Username already exists. Please choose a different one.'
                 return render_template('patient_register.html', message=message)
+            if create_patient_login(generate_patient_id(), username, hashed_password, sa, akey, bkey):
 
-            if create_patient_login(generate_patient_id(), username, hashed_password):
                 message = 'Registration successful! Please login.'
                 return render_template('patient_register.html', message=message)
             else:
@@ -149,7 +158,7 @@ def edit_profile():
     return render_template('patient_profile_edit.html', message=message, profile_data=profile_data)
 
 
-# 患者问诊
+# 患者问诊列表
 @patient_bp.route('/consultation')
 @login_required
 def consultation():
@@ -162,18 +171,54 @@ def consultation():
 @patient_bp.route('/send_request/<int:doctor_id>', methods=['POST'])
 @login_required
 def send_request(doctor_id):
+    # print(f"Received Content-Type: {request.content_type}")
+    online_doctors = get_online_doctors()
     patient_id = current_user.id
     message = None
-    if create_consultation_request(patient_id, doctor_id):
+    # 问诊申请中患者id由医生公钥加密，患者id与医生id之和由患者私钥产生签名，再由医生公钥进行加密
 
+    # get_patient_akey(patient_id,password)
+    # 患者私钥签名,内容为患者id与医生id联合
+    pwd = request.json.get('input')
+    # print(pwd)
+    # 此处添加密码验证逻辑
+    username = current_user.username
+    results = get_patient_login(username)
+    stored_password = results['password']
+    sa = results['sa']
+    if not check_salt_sm3(pwd, sa, stored_password):
+        message = 'Invalid password.'
+        # return redirect(url_for('patient_bp.consultation'))
+        return render_template('patient_consultation.html', online_doctors=online_doctors, message=message)
+
+    to_sign = str(patient_id+doctor_id)
+    print("患者端待签名内容：", type(to_sign), to_sign)
+    akey = get_patient_akey(patient_id, pwd)  # 因为加密时会将字符串encode，所以解密时使用decode恢复字符串，但注意此处本质是hexstr
+    akey = akey.decode()
+    print("患者端签名用的私钥：", type(akey), akey)
+    sign = sm2_sign(to_sign, akey)
+    del akey
+
+    print("患者端生成的签名：", sign)
+    # 添加获取医生公钥，加密的流程
+    d_bkey = get_doctor_key(doctor_id)['b_key']
+    print("患者端获取的医生公钥：",type(d_bkey),d_bkey)  #hexstr
+    pt_id = sm2_encrypt(str(patient_id), d_bkey)
+
+    sign = hexstr_bytes(sign)
+    sign = sm2_encrypt(sign, d_bkey)
+    print("患者端加密签名：",type(sign), sign)
+
+    if create_consultation_request(pt_id, doctor_id, sign):
         # 通过 current_app 访问 socketio 实例
         socketio = current_app.extensions['socketio']
         socketio.emit('new_request', {'doctor_id': doctor_id}, room=f'doctor_{doctor_id}')
         message = 'Request sent successfully.'
     else:
         message = 'Failed to send request.'
-    online_doctors = get_online_doctors()
+
     return render_template('patient_consultation.html', online_doctors=online_doctors, message=message)
+
 
 
 # 患者查看通知

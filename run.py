@@ -191,6 +191,11 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/input_page')
+def index():
+    return render_template('input_page.html')
+
+
 # 在应用启动时初始化数据库
 if __name__ == '__main__':
     initialize_database()

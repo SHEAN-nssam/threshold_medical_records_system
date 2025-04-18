@@ -6,7 +6,10 @@
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
-        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"}
+        {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
+		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"}
       ]
     },
     {
@@ -14,7 +17,10 @@
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
-        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
+		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"},
         {"name": "is_online", "type": "TINYINT(1)", "constraints": "DEFAULT 0"}
       ]
     },
@@ -23,7 +29,10 @@
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
-        {"name": "password", "type": "TINYBLOB", "constraints": "NOT NULL"}
+        {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
+		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"}
       ]
     },
     {
@@ -56,13 +65,13 @@
       "name": "consultation_requests",
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
-        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "patient_id", "type": "TINYBLOB", "constraints": "NOT NULL"},
         {"name": "doctor_id", "type": "INT", "constraints": "NOT NULL"},
         {"name": "status", "type": "VARCHAR(20)", "constraints": "NOT NULL"},
-        {"name": "request_time", "type": "DATETIME", "constraints": "NOT NULL"}
+        {"name": "request_time", "type": "DATETIME", "constraints": "NOT NULL"},
+        {"name": "sign","type": "TINYBLOB","constraints": "NOT NULL"}
       ],
       "foreign_keys": [
-        {"column": "patient_id", "references": "patients(id)"},
         {"column": "doctor_id", "references": "doctors(id)"}
       ]
     },
@@ -89,8 +98,7 @@
       ],
       "foreign_keys": [
         {"column": "patient_id", "references": "patients(id)"},
-        {"column": "doctor_id", "references": "doctors(id)"},
-        {"column": "consultation_request_id", "references": "consultation_requests(id)"}
+        {"column": "doctor_id", "references": "doctors(id)"}
       ]
     },
     {
