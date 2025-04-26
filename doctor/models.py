@@ -468,6 +468,7 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
 def submit_medical_record(record_id):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
+    250426待修改，将修改后的部分提交至归档病历表
     :param record_id: 病历记录ID
     :return: 提交成功返回 True，否则返回 False
     """
@@ -559,6 +560,7 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
 def submit_medical_record_by_request(request_id):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
+    250426待修改，将修改后的部分提交至归档病历表
     :param request_id: 病历记录ID
     :return: 提交成功返回 True，否则返回 False
     """

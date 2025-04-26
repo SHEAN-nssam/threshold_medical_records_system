@@ -186,7 +186,7 @@ def pack(receive_pubkey, data, send_prikey):
     cip = sm4_encrypt(data, sm4_key)#hex_str
     sm3_hash = generate_sm3_hash(data)
 
-    sign = sm2_sign(data,send_prikey)
+    sign = sm2_sign(data, send_prikey)
     sign = sign.encode()
     #print("戳：", env)
     #print("原明文：",data)
@@ -309,6 +309,7 @@ def generate_pbkdf2_key(password, salt, iterations=10000, key_length=16):
                  prf=lambda password, salt: hexstr_bytes(generate_salt_sm3(password, salt)))
 
     return key
+
 
 
 if __name__ == "__main__":

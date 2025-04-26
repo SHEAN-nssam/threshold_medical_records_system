@@ -295,6 +295,7 @@ def medical_record(request_id):
     else:
         print(medical_record_data)
         pass
+    # 如果存在病历则解密现有病历
 
     if request.method == 'POST':
         patient_complaint = request.form['patient_complaint']
@@ -312,6 +313,7 @@ def medical_record(request_id):
                 message = 'Draft saved successfully.'
             else:
                 message = 'Failed to save draft.'
+            # 加密病历已经写好的部分（以未提交状态加密）
         elif action == 'submit':
             # 提交病历
             if update_medical_record_by_request(request_id, patient_complaint, medical_history, physical_examination,
@@ -326,6 +328,8 @@ def medical_record(request_id):
                 message = message + "  "+"Consultation ended successfully."
             else:
                 message = message + "  "+"Failed to end consultation."
+            # 以提交状态加密（分片）
+            # 分片分为三个，1号分片属于服务器，2号分片属于患者，3号分片属于管理员，需要再次进行加密
 
     return render_template('doctor_medical_record.html', requests=requests,
                            medical_record=medical_record_data, message=message)
