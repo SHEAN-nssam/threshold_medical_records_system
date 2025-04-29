@@ -260,7 +260,7 @@ def get_medical_records(user_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT * FROM medical_records WHERE patient_id = %s and status = 'ap' ORDER BY created_at DESC",
+            "SELECT * FROM archived_medical_records WHERE patient_id = %s ORDER BY created_at DESC",
             (user_id,)
         )
         mr = cursor.fetchall()
@@ -271,6 +271,27 @@ def get_medical_records(user_id):
             cursor.close()
             connection.close()
     return mr
+
+
+def get_pt_sh_by_medical_record(mr_id):
+    connection = None
+    cursor = None
+    sh = []
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT sh FROM pt_sh WHERE mr_id = %s",
+            (mr_id,)
+        )
+        sh = cursor.fetchone()  # 此处的分片还是由患者公钥加密的状态
+    except Error as e:
+        print(f"Error in get_patient_notifications: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return sh
 
 
 if __name__ == '__main__':

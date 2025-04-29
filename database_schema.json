@@ -2,14 +2,22 @@
   "database": "ch_test_not_safe",
   "tables": [
     {
+      "name": "admin_public_keys",
+      "columns": [
+        {"name": "public_key", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
       "name": "admins",
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
         {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
-		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"}
+		{"name": "sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "b_key","type":"VARCHAR(130)","constraints":"NOT NULL"},
+        {"name": "adksh","type": "TINYBLOB","constraints":"NOT NULL"}
       ]
     },
     {
@@ -18,9 +26,9 @@
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
         {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
-		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"},
+		{"name": "sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "b_key","type":"VARCHAR(130)","constraints":"NOT NULL"},
         {"name": "is_online", "type": "TINYINT(1)", "constraints": "DEFAULT 0"}
       ]
     },
@@ -30,9 +38,9 @@
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY"},
         {"name": "username", "type": "VARCHAR(80)", "constraints": "UNIQUE NOT NULL"},
         {"name": "password", "type": "VARCHAR(64)", "constraints": "NOT NULL"},
-		{"name":"sa","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"a_key","type":"TINYBLOB","constraints":"NOT NULL"},
-		{"name":"b_key","type":"VARCHAR(130)","constraints":"NOT NULL"}
+		{"name": "sa","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "a_key","type":"TINYBLOB","constraints":"NOT NULL"},
+		{"name": "b_key","type":"VARCHAR(130)","constraints":"NOT NULL"}
       ]
     },
     {
@@ -76,7 +84,7 @@
       ]
     },
     {
-      "name": "medical_records",
+      "name": "processing_medical_records",
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
         {"name": "consultation_request_id", "type": "INT", "constraints": "NOT NULL"},
@@ -102,6 +110,51 @@
       ]
     },
     {
+      "name": "archived_medical_records",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "consultation_request_id", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "doctor_id", "type": "TINYBLOB", "constraints": "NOT NULL"},
+
+        {"name": "visit_date", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "department", "type": "TINYBLOB", "constraints": "NOT NULL"},
+        {"name": "patient_complaint", "type": "BLOB"},
+        {"name": "medical_history", "type": "BLOB"},
+        {"name": "physical_examination", "type": "BLOB"},
+        {"name": "auxiliary_examination", "type": "BLOB"},
+        {"name": "diagnosis", "type": "BLOB"},
+        {"name": "treatment_advice", "type": "BLOB"},
+        {"name": "doctor_signature", "type": "BLOB"},
+
+        {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"},
+		{"name": "server_share","type":"TINYBLOB"}
+      ],
+      "foreign_keys": [
+        {"column": "patient_id", "references": "patients(id)"}
+      ]
+    },
+    {
+      "name": "pt_sh",
+      "columns": [
+        {"name": "mr_id","type": "INT"},
+        {"name": "sh","type": "TINYBLOB"}
+      ],
+      "foreign_keys": [
+        {"column":"mr_id","references": "archived_medical_records(id)"}
+      ]
+    },
+    {
+      "name": "ad_sh",
+      "columns": [
+        {"name": "mr_id","type": "INT"},
+        {"name": "sh","type": "TINYBLOB"}
+      ],
+      "foreign_keys": [
+        {"column":"mr_id","references": "archived_medical_records(id)"}
+      ]
+    },
+    {
       "name": "patient_notifications",
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
@@ -116,7 +169,7 @@
       ]
     },
     {
-      "name": "review_records",
+      "name": "review_records_processing",
       "columns": [
         {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
         {"name": "mr_id","type":"INT","constraints": "NOT NULL"},
@@ -126,7 +179,21 @@
         {"name": "review_date", "type": "DATETIME"}
       ],
       "foreign_keys": [
-        {"column": "mr_id", "references": "medical_records(id)"},
+        {"column": "mr_id", "references": "processing_medical_records(id)"},
+        {"column": "review_by", "references": "admins(id)"}
+      ]
+    },
+    {
+      "name": "review_records_archived",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "mr_id","type":"INT","constraints": "NOT NULL"},
+        {"name": "result", "type": "BOOLEAN", "constraints": "DEFAULT FALSE NOT NULL"},
+        {"name": "review_by", "type": "INT"},
+        {"name": "review_date", "type": "DATETIME"}
+      ],
+      "foreign_keys": [
+        {"column": "mr_id", "references": "archived_medical_records(id)"},
         {"column": "review_by", "references": "admins(id)"}
       ]
     }

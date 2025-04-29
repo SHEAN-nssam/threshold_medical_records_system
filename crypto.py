@@ -38,7 +38,7 @@ def bytes_hexstr(data):
     return data.hex()
 
 
-def generate_sm2_key_pair(): # 生成密钥为str格式
+def generate_sm2_key_pair():  # 生成密钥为str格式
     '''
 
     :return: private_key, public_key_str
@@ -50,7 +50,7 @@ def generate_sm2_key_pair(): # 生成密钥为str格式
     return private_key, public_key_str
 
 
-def sm2_encrypt(data,public_key):#生成加密数据为bytes格式
+def sm2_encrypt(data,public_key):  # 生成加密数据为bytes格式
     '''
     :param data:
     :param public_key:
@@ -61,13 +61,13 @@ def sm2_encrypt(data,public_key):#生成加密数据为bytes格式
     else:
         enc = sm2.CryptSM2(public_key=bytes_hexstr(public_key), private_key="")
     if isinstance(data, str):
-        encrypted_data = enc.encrypt(data.encode())
+        encrypted_data = enc.encrypt(data.encode('utf-8'))
     else:
         encrypted_data = enc.encrypt(data)
     return encrypted_data
 
 
-def sm2_decrypt(data,private_key):#生成解密数据为bytes格式
+def sm2_decrypt(data,private_key):  # 生成解密数据为bytes格式
     if isinstance(private_key, str):
         dec = sm2.CryptSM2(public_key="", private_key=private_key)
     else:
@@ -75,12 +75,12 @@ def sm2_decrypt(data,private_key):#生成解密数据为bytes格式
     if isinstance(data, bytes):
         decrypted_data = dec.decrypt(data)
     else:
-        decrypted_data = dec.decrypt(data.encode())
+        decrypted_data = dec.decrypt(data.encode('utf-8'))
         #decrypted_data = dec.decrypt(bytes_hexstr(data))
     return decrypted_data
 
 
-def sm2_sign(data, private_key):#生成签名格式为str格式
+def sm2_sign(data, private_key):  # 生成签名格式为str格式
     # 被签名的data值统一转化为哈希值再签名
     random_hex_str = func.random_hex(32)
     if isinstance(private_key, str):
@@ -96,7 +96,7 @@ def sm2_sign(data, private_key):#生成签名格式为str格式
     return signature
 
 
-def sm2_verify(signature, message, public_key):#认证结果为布尔变量
+def sm2_verify(signature, message, public_key):  # 认证结果为布尔变量
     '''
     sm2签名校验
     :param signature:
@@ -116,13 +116,13 @@ def sm2_verify(signature, message, public_key):#认证结果为布尔变量
 
 
 # 生成128位随机密钥
-def generate_sm4_key():#生成密钥为str格式
+def generate_sm4_key():  # 生成密钥为str格式
     key = func.random_hex(32)  # 生成32个字符的十六进制字符串，即128位
     return key
 
 
 # 加密函数
-def sm4_encrypt(plaintext, key):#生成加密数据为bytes格式
+def sm4_encrypt(plaintext, key):  # 生成加密数据为bytes格式
     '''
     sm4对称加密，若明文为字符串会将明文编码后用于运算
     :param plaintext: 可为bytes或字符串
@@ -135,11 +135,12 @@ def sm4_encrypt(plaintext, key):#生成加密数据为bytes格式
     else:
         crypt_sm4.set_key(key.encode(), sm4.SM4_ENCRYPT)  # 设置密钥和加密模式
     if isinstance(plaintext, str):
-        ciphertext = crypt_sm4.crypt_cbc(b'\x00' * 16, plaintext.encode())  # 使用CBC模式加密
+        ciphertext = crypt_sm4.crypt_cbc(b'\x00' * 16, plaintext.encode('utf-8'))  # 使用CBC模式加密
     else:
         ciphertext = crypt_sm4.crypt_cbc(b'\x00' * 16, plaintext)
     # return ciphertext.hex()  # 返回密文
     return ciphertext
+
 
 # 解密函数
 def sm4_decrypt(ciphertext, key):#解密数据为bytes格式
@@ -187,7 +188,7 @@ def pack(receive_pubkey, data, send_prikey):
     sm3_hash = generate_sm3_hash(data)
 
     sign = sm2_sign(data, send_prikey)
-    sign = sign.encode()
+    sign = sign.encode('utf-8')
     #print("戳：", env)
     #print("原明文：",data)
     #print("加密明文：", cip)
@@ -197,7 +198,7 @@ def pack(receive_pubkey, data, send_prikey):
     return env+b"-*-"+hexstr_bytes(cip)+b"-*-"+sign
 
 
-def unpack(send_pubkey, data ,receive_prikey):
+def unpack(send_pubkey, data, receive_prikey):
     env = data.split(b"-*-")[0]
     cip = data.split(b"-*-")[1]
     sign = data.split(b"-*-")[2]
@@ -219,7 +220,7 @@ def unpack(send_pubkey, data ,receive_prikey):
     print(veri_result)
     if veri_result:
         print("签名为真")
-        return message.decode()
+        return message.decode('utf-8')
     else:
         print("签名不符")
         return 0
@@ -311,6 +312,24 @@ def generate_pbkdf2_key(password, salt, iterations=10000, key_length=16):
     return key
 
 
+from datetime import datetime
+def datetime_to_str(dt: datetime) -> str:
+    """
+    将 datetime 对象转换为字符串
+    参数:dt: datetime 对象
+    返回:格式化后的字符串 (格式: YYYY-MM-DD HH:MM:SS)
+    """
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def str_to_datetime(date_str: str) -> datetime:
+    """
+    将字符串转换为 datetime 对象
+    参数:date_str: 表示日期和时间的字符串 (格式: YYYY-MM-DD HH:MM:SS)
+    返回:转换后的 datetime 对象
+    """
+    return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+
 
 if __name__ == "__main__":
 
@@ -318,6 +337,42 @@ if __name__ == "__main__":
 
     #salt = b"5209f6f54f0a74a45090e9e306c5d78e"
     data = "Hello,here is 120.你好这里是120"
+
+# b'\xd6V\xf6\xff\xdd\x08\x7f{)xR\xbe\xbe,x\xf7(\x02V8\x06\xd4\xddR\x0eR?\x98\xcf`\xca<\xa7\x87\x02\x11\x04\x9aB\x18,\xee\xe3\xb1W7\xfb\x1a\xc8Yl\xd5\xe6<\xf3P\xf14\xf5M\xfd,\xf5"S\xd9\xa1\x97\x8e\xa7\xb3\xe67Y\x87;.-I\xae4\x01\r\x9a\x1a\x8c\xcf\xe4\x87\xb0Y\xf2\x1e\x10q\x8af\xa0\x05\xca\x85D\x05<'
+
+    test = b'\xd6V\xf6\xff\xdd\x08\x7f{)xR\xbe\xbe,x\xf7(\x02V8\x06\xd4\xddR\x0eR?\x98\xcf`\xca<\xa7\x87\x02\x11\x04\x9aB\x18,\xee\xe3\xb1W7\xfb\x1a\xc8Yl\xd5\xe6<\xf3P\xf14\xf5M\xfd,\xf5"S\xd9\xa1\x97\x8e\xa7\xb3\xe67Y\x87;.-I\xae4\x01\r\x9a\x1a\x8c\xcf\xe4\x87\xb0Y\xf2\x1e\x10q\x8af\xa0\x05\xca\x85D\x05<'
+    bkey = "0443537ec05ba2044d5e395e5cd14b5ff38e8dad6fb0eb047cc9eeb435486509c416a809346339a23eb836ea33e2cb98bb5d987fc1329024e07496314b686fb1a3"
+    akey = "7310e3e744f518368aa4eb2a37393de9609c0bb7988796889805db475a3a22f9"
+    result = sm2_decrypt(test, akey)
+    print(result)
+    # 钥匙有误
+
+    en_data = sm2_encrypt(data, bkey)
+    de_data = sm2_encrypt(en_data, akey)
+    print(de_data)
+
+
+'''
+    key = generate_sm4_key()
+    print(key)
+    key = hexstr_bytes(key)
+    print(key)
+    shares = split_secret(key, 2, 3)
+    print(shares)
+    print(shares[0][0])
+    print(shares[0][1])
+    print(shares[0][2])
+    _, one_share = shares[0][0]
+    _, two_share = shares[0][1]
+    print(one_share)
+    to_combine=[(1,one_share),(2,two_share)]
+    # to_combine=[(2,one_share),(3,two_share)]  #分片序号也是重要因素，写错序号会导致恢复结果错误
+    print(to_combine)
+    re = combine_secret([to_combine], 2)
+    print("re", re)
+    print(bytes_hexstr(re))
+'''
+'''
     password = "qq123456"
     sa = generate_salt()
 
@@ -370,7 +425,9 @@ if __name__ == "__main__":
 
     sign = sm2_sign(to_sign,akey)
     # 验签公钥不可为bytes格式
-    '''
+'''
+
+'''
     print(sign)
     print(sm2_verify(sign,to_sign,bkey))
     sign = sm2_sign(to_sign,hb_akey)
@@ -394,7 +451,7 @@ if __name__ == "__main__":
 
     print(sign_result)
     '''
-
+'''
     pt_en = sm2_encrypt(str(pt), bkey)
     print(pt_en)
 
@@ -408,6 +465,6 @@ if __name__ == "__main__":
 
     re_pt=sm2_decrypt(pt_en, de_akey)
     print(re_pt)
-
+'''
 
 

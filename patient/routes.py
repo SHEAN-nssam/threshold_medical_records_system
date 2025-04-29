@@ -56,6 +56,8 @@ def register():
         sa = generate_salt()
         hashed_password = generate_salt_sm3(password, sa)
         akey, bkey = generate_sm2_key_pair()
+        print(f"患者{username}初始生成的私钥：", akey)
+        print(f"患者{username}初始生成的公钥：", bkey)
         tkey = generate_pbkdf2_key(password, sa)
         akey = sm4_encrypt(akey, tkey)
         del tkey
@@ -202,12 +204,13 @@ def send_request(doctor_id):
     print("患者端生成的签名：", sign)
     # 添加获取医生公钥，加密的流程
     d_bkey = get_doctor_key(doctor_id)['b_key']
-    print("患者端获取的医生公钥：",type(d_bkey),d_bkey)  #hexstr
-    pt_id = sm2_encrypt(str(patient_id), d_bkey)
-
+    print("患者端获取的医生公钥：", type(d_bkey), d_bkey)  # hexstr
+    patient_id = str(patient_id).encode('utf-8')
+    pt_id = sm2_encrypt(patient_id, d_bkey)
+    print("患者id加密后：", pt_id)
     sign = hexstr_bytes(sign)
     sign = sm2_encrypt(sign, d_bkey)
-    print("患者端加密签名：",type(sign), sign)
+    print("患者端加密签名：", type(sign), sign)
 
     if create_consultation_request(pt_id, doctor_id, sign):
         # 通过 current_app 访问 socketio 实例
@@ -230,12 +233,107 @@ def notifications():
 
 
 # 患者病历查询
-@patient_bp.route('/medical_records')
+@patient_bp.route('/medical_records', methods=['POST', 'GET'])
 @login_required
 def medical_records():
-    records = get_medical_records(current_user.id)
-    return render_template('patient_medical_records.html',records=records)
+    records=None
+    # records = get_medical_records(current_user.id)
 
+    if request.method == 'POST':
+        pwd = request.form.get('input')
+    # print(pwd)
+    # 此处添加密码验证逻辑
+        username = current_user.username
+        results = get_patient_login(username)
+        stored_password = results['password']
+        sa = results['sa']
+        if not check_salt_sm3(pwd, sa, stored_password):
+            message = 'Invalid password.'
+            # return redirect(url_for('patient_bp.consultation'))
+            return render_template('patient_medical_records.html',records=records)
+        print(pwd)
+        akey = get_patient_akey(current_user.id, pwd)  # 因为加密时会将字符串encode，所以解密时使用decode恢复字符串，但注意此处本质是hexstr
+        akey = akey.decode()
+        # 函数有待编写
+        records = get_medical_records(current_user.id)
+        print(records)
+        for record in records:
+            mr_pt_sh = get_pt_sh_by_medical_record(record['id'])['sh']
+            print("en mr_pt_sh:", mr_pt_sh)
+            mr_pt_sh = sm2_decrypt(mr_pt_sh, akey)
+            print("mr_pt_sh:", mr_pt_sh)
+            mr_pt_sh = (2, mr_pt_sh)
+            mr_sv_sh = (1, record['server_share'])
+            to_combine = [mr_sv_sh, mr_pt_sh]
+            mr_tkey = combine_secret([to_combine], 2)
+            mr_tkey = bytes_hexstr(mr_tkey)
+
+            cr_id = sm4_decrypt(record["consultation_request_id"], mr_tkey)
+            cr_id = int(cr_id.decode('utf-8'))
+            print("cr_id:", cr_id)
+            record["consultation_request_id"] = cr_id
+
+            dc_id = sm4_decrypt(record["doctor_id"], mr_tkey)
+            dc_id = int(dc_id.decode('utf-8'))
+            print("dc_id:", dc_id)
+            record["doctor_id"] = dc_id
+
+            vi_da = sm4_decrypt(record["visit_date"], mr_tkey)
+            vi_da = vi_da.decode()
+            vi_da = str_to_datetime(vi_da)
+            print("vi_da:", vi_da)
+            record["visit_date"] = vi_da
+
+            department = sm4_decrypt(record["department"], mr_tkey)
+            department = department.decode()
+            print("department:", department)
+            record["department"]=department
+            patient_complaint = sm4_decrypt(record["patient_complaint"], mr_tkey)
+            patient_complaint = patient_complaint.decode()
+            print("patient_complaint:", patient_complaint)
+            record["patient_complaint"]=patient_complaint
+            medical_history = sm4_decrypt(record["medical_history"], mr_tkey)
+            medical_history = medical_history.decode()
+            print("medical_history:", medical_history)
+            record["medical_history"]=medical_history
+            physical_examination = sm4_decrypt(record["physical_examination"], mr_tkey)
+            physical_examination = physical_examination.decode()
+            print("physical_examination:", physical_examination)
+            record["physical_examination"]=physical_examination
+            auxiliary_examination = sm4_decrypt(record["auxiliary_examination"], mr_tkey)
+            auxiliary_examination = auxiliary_examination.decode()
+            print("auxiliary_examination:", auxiliary_examination)
+            record["auxiliary_examination"]=auxiliary_examination
+            diagnosis = sm4_decrypt(record["diagnosis"], mr_tkey)
+            diagnosis = diagnosis.decode()
+            print("diagnosis:", diagnosis)
+            record["diagnosis"]=diagnosis
+            treatment_advice = sm4_decrypt(record["treatment_advice"], mr_tkey)
+            treatment_advice = treatment_advice.decode()
+            print("treatment_advice:", treatment_advice)
+            record["treatment_advice"]=treatment_advice
+
+    return render_template('patient_medical_records.html', records=records)
+
+
+'''
+            cr_id = str(medical_record["consultation_request_id"]).encode('utf-8')
+            medical_record["consultation_request_id"] = sm4_encrypt(cr_id, mr_key)
+
+            dc_id = str(medical_record["doctor_id"]).encode('utf-8')
+            medical_record["doctor_id"] = sm4_encrypt(dc_id, mr_key)
+
+            vi_da=datetime_to_str(medical_record["visit_date"])
+            medical_record["visit_date"] = sm4_encrypt(vi_da, mr_key)
+
+            medical_record["department"] = sm4_encrypt(medical_record["department"], mr_key)
+            medical_record["patient_complaint"] = sm4_encrypt(medical_record["patient_complaint"], mr_key)
+            medical_record["medical_history"] = sm4_encrypt(medical_record["medical_history"], mr_key)
+            medical_record["physical_examination"] = sm4_encrypt(medical_record["physical_examination"], mr_key)
+            medical_record["auxiliary_examination"] = sm4_encrypt(medical_record["auxiliary_examination"], mr_key)
+            medical_record["diagnosis"] = sm4_encrypt(medical_record["diagnosis"], mr_key)
+            medical_record["treatment_advice"] = sm4_encrypt(medical_record["treatment_advice"], mr_key)
+            '''
 
 # 注销功能
 @patient_bp.route('/logout')

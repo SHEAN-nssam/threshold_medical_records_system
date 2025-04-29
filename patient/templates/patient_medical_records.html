@@ -16,7 +16,6 @@
         <div class="content">
             <div class="sidebar">
                 <h2>功能菜单</h2>
-
                     <div class="function-buttons">
                         <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
                             <h3>个人信息</h3>
@@ -35,19 +34,31 @@
                             <p>查看您的病历记录</p>
                         </a>
                     </div>
-
-                </div>
-
+            </div>
 
             <div class="main-content">
                 <div class="content-area">
                     <h2>既往病历查询</h2>
                     <!-- 这里可以放置具体页面的内容 -->
+                    <!-- 在此处插入与获取用户密码相关的功能 -->
+
+                    <!-- 密码输入表单 -->
+                    <div id="passwordForm">
+                        <h3>请输入密码查看病历</h3>
+                        <p>为了保护您的隐私，请输入您的密码以查看病历记录。</p>
+                        <form method="POST">
+                            <label for="input">密码:</label>
+                            <input type="password" id="input" name="input" required>
+                            <button type="submit" >确认</button>
+                        </form>
+                        <div id="error" class="error"></div>
+                    </div>
+
                     <div id="records">
-        {% if records %}
-            <ul>
-                {% for record in records %}
-                    <li>
+                        {% if records %}
+                        <ul>
+                            {% for record in records %}
+                            <li>
                         病历号: {{ record.id }}
                         <p>医生号: {{ record.doctor_id }}</p>
                         <p>患者号: {{ record.patient_id }}</p>
@@ -87,6 +98,8 @@
             // 处理退出登录的逻辑
             window.location.href = "{{ url_for('patient_bp.logout') }}";
         }
+
+
     </script>
 </body>
 </html>

@@ -368,7 +368,7 @@ def get_active_consultation_requests(doctor_id):
     return requests
 
 
-def create_medical_record(consultation_request_id):
+def create_medical_record(consultation_request_id,patient_id):
     """
     创建新的病历记录，自动填写病历号、问诊申请号、患者号、医生号、问诊时间、科室和病历创建时间，并将病历状态设置为 'uc'（未完成）。
     :param consultation_request_id: 问诊申请ID
@@ -382,13 +382,13 @@ def create_medical_record(consultation_request_id):
         cursor = connection.cursor(dictionary=True)
 
         # 获取问诊申请信息
-        cursor.execute("SELECT patient_id, doctor_id, request_time FROM consultation_requests WHERE id = %s", (consultation_request_id,))
+        cursor.execute("SELECT * FROM consultation_requests WHERE id = %s", (consultation_request_id,))
         consultation_request = cursor.fetchone()
         if not consultation_request:
             print("Consultation request not found.")
             return False
 
-        patient_id = consultation_request['patient_id']
+        # patient_id = consultation_request['patient_id']
         doctor_id = consultation_request['doctor_id']
         visit_date = consultation_request['request_time']
 
@@ -403,7 +403,7 @@ def create_medical_record(consultation_request_id):
         # 插入病历记录
         cursor.execute(
             """
-            INSERT INTO medical_records 
+            INSERT INTO processing_medical_records 
             (consultation_request_id, patient_id, doctor_id, visit_date, department, status, created_at)
             VALUES 
             (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
@@ -443,7 +443,7 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
         # 更新病历记录
         cursor.execute(
             """
-            UPDATE medical_records
+            UPDATE processing_medical_records
             SET
                 patient_complaint = %s,
                 medical_history = %s,
@@ -468,7 +468,6 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
 def submit_medical_record(record_id):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
-    250426待修改，将修改后的部分提交至归档病历表
     :param record_id: 病历记录ID
     :return: 提交成功返回 True，否则返回 False
     """
@@ -480,7 +479,7 @@ def submit_medical_record(record_id):
         cursor = connection.cursor(dictionary=True)
 
         # 获取医生ID和当前时间
-        cursor.execute("SELECT doctor_id FROM medical_records WHERE id = %s", (record_id,))
+        cursor.execute("SELECT doctor_id FROM processing_medical_records WHERE id = %s", (record_id,))
         medical_record = cursor.fetchone()
         if not medical_record:
             print("Medical record not found.")
@@ -494,7 +493,7 @@ def submit_medical_record(record_id):
         # 更新病历状态和签名
         cursor.execute(
             """
-            UPDATE medical_records
+            UPDATE processing_medical_records
             SET
                 doctor_signature = %s,
                 status = 'wr'
@@ -534,7 +533,7 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
         # 更新病历记录
         cursor.execute(
             """
-            UPDATE medical_records
+            UPDATE processing_medical_records
             SET
                 patient_complaint = %s,
                 medical_history = %s,
@@ -560,7 +559,6 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
 def submit_medical_record_by_request(request_id):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
-    250426待修改，将修改后的部分提交至归档病历表
     :param request_id: 病历记录ID
     :return: 提交成功返回 True，否则返回 False
     """
@@ -572,7 +570,7 @@ def submit_medical_record_by_request(request_id):
         cursor = connection.cursor(dictionary=True)
 
         # 获取医生ID和当前时间
-        cursor.execute("SELECT doctor_id FROM medical_records WHERE consultation_request_id = %s", (request_id,))
+        cursor.execute("SELECT doctor_id FROM processing_medical_records WHERE consultation_request_id = %s", (request_id,))
         medical_record = cursor.fetchone()
         if not medical_record:
             print("Medical record not found.")
@@ -586,7 +584,7 @@ def submit_medical_record_by_request(request_id):
         # 更新病历状态和签名
         cursor.execute(
             """
-            UPDATE medical_records
+            UPDATE processing_medical_records
             SET
                 doctor_signature = %s,
                 status = 'wr'
@@ -610,7 +608,7 @@ def get_medical_record(record_id):
     '''
     从病历号获取病历
     :param record_id: 病历号
-    :return: medical_records格式的字典
+    :return: processing_medical_records格式的字典
     '''
     connection = None
     cursor = None
@@ -619,7 +617,7 @@ def get_medical_record(record_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT * FROM medical_records WHERE id = %s",
+            "SELECT * FROM processing_medical_records WHERE id = %s",
             (record_id,)
         )
         medical_record = cursor.fetchone()
@@ -636,7 +634,7 @@ def get_medical_records_by_request(request_id):
     '''
     从问诊申请号获取病历
     :param request_id:问诊申请号
-    :return: medical_records格式的字典
+    :return: processing_medical_records格式的字典
     '''
     connection = None
     cursor = None
@@ -645,7 +643,7 @@ def get_medical_records_by_request(request_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT * FROM medical_records WHERE consultation_request_id = %s ORDER BY created_at DESC",
+            "SELECT * FROM processing_medical_records WHERE consultation_request_id = %s ORDER BY created_at DESC",
             (request_id,)
         )
         medical_records = cursor.fetchone()
@@ -668,7 +666,7 @@ def get_records_correct(doctor_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
         cursor.execute(
-            "SELECT id FROM medical_records WHERE status = 'na' ORDER BY created_at DESC"
+            "SELECT id FROM processing_medical_records WHERE status = 'na' ORDER BY created_at DESC"
         )
         mrs = cursor.fetchall()
         # print(mrs)

@@ -4,6 +4,8 @@ import json
 import mysql.connector
 from mysql.connector import Error
 from flask_socketio import SocketIO
+from crypto import *
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'qwertyuiopasdfghjklzxcvbnm--qazwsxedcrfvtgbyhnujmikolp'  # 设置密钥
@@ -122,6 +124,61 @@ def initialize_database():
             cursor.execute(create_table_sql)
             print(f"Table '{table_name}' created or already exists.")
 
+        # 预先创建管理员用户
+        # 判断表中是否已有管理员用户
+        cursor.execute("SELECT COUNT(*) FROM admins")
+        count = cursor.fetchone()[0]
+
+        if count == 0:
+
+            # 定义三个管理员用户的信息
+            admin_users = [
+                {
+                    "id": 10000001,
+                    "username": "admin1",
+                    "password": "123456"
+                },
+                {
+                    "id": 10000002,
+                    "username": "admin2",
+                    "password": "123456"
+                },
+                {
+                    "id": 10000003,
+                    "username": "admin3",
+                    "password": "123456"
+                }
+            ]
+
+            # 生成管理员共同公私钥对，并将私钥分为三片
+            ad_key, public_key = generate_sm2_key_pair()
+            ad_key = hexstr_bytes(ad_key)
+            shares = split_secret(ad_key, 2, 3)
+            del ad_key
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # 存储公钥到 admin_public_keys 表
+            cursor.execute(
+                "INSERT INTO admin_public_keys (public_key,created_at) VALUES (%s,%s)",
+                (public_key, current_time)
+            )
+
+            share_index = 0
+            # 插入三个管理员用户
+            for admin in admin_users:
+                # 密码加密
+                sa = generate_salt()
+                hashed_password = generate_salt_sm3(admin["password"], sa)
+                akey, bkey = generate_sm2_key_pair()
+                tkey = generate_pbkdf2_key(admin["password"], sa)
+                akey = sm4_encrypt(akey, tkey)
+                del tkey
+                _, adksh = shares[0][share_index]
+                cursor.execute(
+                    "INSERT INTO admins (id, username, password, sa, a_key, b_key, adksh) VALUES (%s, %s, %s, %s, %s,%s,%s)",
+                    (admin["id"], admin["username"], hashed_password, sa, akey, bkey, adksh)
+                )
+                share_index = share_index + 1
+        print("admins inserted")
         # 提交事务
         connection.commit()
         print("sheets are ready")

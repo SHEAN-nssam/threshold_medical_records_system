@@ -65,7 +65,9 @@ def register():
         # hashed_password = generate_password_hash(password).encode('utf-8')
         sa = generate_salt()
         hashed_password = generate_salt_sm3(password, sa)
-        akey, bkey = generate_sm2_key_pair()  # 此处密钥对是十六进制字符串
+        akey, bkey = generate_sm2_key_pair()  # 此处密钥对是十六进制字符串]
+        print(f"医生{username}初始生成的私钥：", akey)
+        print(f"医生{username}初始生成的公钥：", bkey)
         tkey = generate_pbkdf2_key(password, sa)
         akey = sm4_encrypt(akey, tkey)  # 此处加密后的私钥是bytes
         del tkey
@@ -193,10 +195,11 @@ def view_appointments():
     viewed_requests = []
     for request in requests:
         # 获取患者id
-        print("sm2解密前：",type(request['patient_id']),request['patient_id'])
+        print("sm2解密前：", type(request['patient_id']), request['patient_id'])
         patient_id = sm2_decrypt(request['patient_id'], dc_akey)
-        print("sm2解密后：",type(patient_id),patient_id)
-        patient_id = int(patient_id.decode())
+        print("sm2解密后：", type(patient_id), patient_id)
+        patient_id = patient_id.decode('utf-8')
+        patient_id = int(patient_id)
 
         # 通过患者id获取公钥并校验签名
         pt_bkey = get_patient_key(patient_id)['b_key']
@@ -205,9 +208,9 @@ def view_appointments():
         sign = sm2_decrypt(request['sign'], dc_akey)
         sign = bytes_hexstr(sign)
         # print(sign)
-        print("医生获取的解密签名：",type(sign), sign)
+        print("医生获取的解密签名：", type(sign), sign)
         print("医生校验签名使用的患者公钥：", type(pt_bkey), pt_bkey)
-        print("医生校验签名使用的消息：",type(to_sign), to_sign)
+        print("医生校验签名使用的消息：", type(to_sign), to_sign)
         sign_result = sm2_verify(sign, to_sign, pt_bkey)
         print(sign_result)
         if sign_result is True:
@@ -220,6 +223,7 @@ def view_appointments():
     else:
         print("无合法申请")
     del dc_akey
+
     return render_template('doctor_appointments.html', requests=viewed_requests)
 
 
@@ -229,6 +233,7 @@ def view_appointments():
 def respond_request(request_id, action):
     status = 'accepted' if action == 'accept' else 'rejected'
     # print(f"{request_id}号通知，有患者呼叫医生")
+
     message = None
     if update_consultation_request(request_id, status):
         message = 'Request updated successfully.'
@@ -241,35 +246,36 @@ def respond_request(request_id, action):
                       room=f'patient_{get_patient_id(request_id)}')
     else:
         message = 'Failed to update request.'
+    '''
+    password = session.get('pw')
+    dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+    dc_akey = dc_akey.decode()
+    # 获取加密的患者ID并解密
+    encrypted_patient_id = get_patient_id(request_id)  # 假设此函数返回加密的患者ID
+    patient_id_bytes = sm2_decrypt(encrypted_patient_id, dc_akey)
+    patient_id = int(patient_id_bytes.decode('utf-8'))
+    del dc_akey
+    request['patient_id'] = patient_id
+    '''
     requests = get_consultation_requests(current_user.id)
     return render_template('doctor_appointments.html', requests=requests, message=message)
 
-'''
-# 医生结束问诊
-@doctor_bp.route('/end_consultation/<int:request_id>', methods=['POST'])
-@login_required
-def end_consultation(request_id):
-    message = None
-
-    if update_consultation_request(request_id, 'completed'):
-        message = 'Consultation ended successfully.'
-        # 发送通知给患者
-        patient_id = get_patient_id(request_id)
-        add_notification(patient_id, request_id, 'completed')
-        socketio = current_app.extensions['socketio']
-        # 通过 WebSocket 通知患者
-        socketio.emit('consultation_ended', {'request_id': request_id}, room=f'patient_{get_patient_id(request_id)}')
-    else:
-        message = 'Failed to end consultation.'
-    requests = get_consultation_requests(current_user.id)
-    return render_template('doctor_appointments.html', requests=requests, message=message)
-'''
 
 @doctor_bp.route('/medical_records')
 @login_required
 def request_list():
     requests = get_active_consultation_requests(current_user.id)
     rejected_records = get_records_correct(current_user.id)
+    password = session.get('pw')
+    dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+    dc_akey = dc_akey.decode()
+    for c_request in requests:
+        encrypted_patient_id = c_request['patient_id']
+        patient_id_bytes = sm2_decrypt(encrypted_patient_id, dc_akey)
+        patient_id = int(patient_id_bytes.decode('utf-8'))
+        c_request['patient_id'] = patient_id
+
+    print(requests)
     return render_template('doctor_request_list.html', requests=requests, rejected_records=rejected_records)
 
 
@@ -277,23 +283,41 @@ def request_list():
 @login_required
 def medical_record(request_id):
     message = None
-    medical_record_data = None
     requests = get_active_consultation_requests(current_user.id)
+    password = session.get('pw')
+    dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+    dc_akey = dc_akey.decode()
+    for c_request in requests:
+        encrypted_patient_id = c_request['patient_id']
+        patient_id_bytes = sm2_decrypt(encrypted_patient_id, dc_akey)
+        patient_id = int(patient_id_bytes.decode('utf-8'))
+        c_request['patient_id'] = patient_id
+
+    print(requests)
+
     # 检查病历是否存在
+    medical_record_data = None
     medical_record_data = get_medical_records_by_request(request_id)
-    #print(medical_record_data)
+    print(medical_record_data)
     exist = bool(medical_record_data)
-    #print(exist)
+    # print(exist)
+    del dc_akey
     if exist is False:
+        patient_id = None
         # 如果病历不存在，创建新病历
         #print(f"{request_id}号申请对应的病历不存在")
-        if create_medical_record(request_id):
+        for c_request in requests:
+            if c_request['id'] == request_id:
+                patient_id = c_request['patient_id']
+        if create_medical_record(request_id, patient_id):
             medical_record_data = get_medical_records_by_request(request_id)
             message = 'New medical record created.'
         else:
             message = 'Failed to create medical record.'
     else:
         print(medical_record_data)
+        # medical_record_data['patient_id'] = int(sm2_decrypt(medical_record_data['patient_id'], dc_akey).decode('utf-8'))
+        # 可能用不上这条
         pass
     # 如果存在病历则解密现有病历
 
@@ -328,8 +352,7 @@ def medical_record(request_id):
                 message = message + "  "+"Consultation ended successfully."
             else:
                 message = message + "  "+"Failed to end consultation."
-            # 以提交状态加密（分片）
-            # 分片分为三个，1号分片属于服务器，2号分片属于患者，3号分片属于管理员，需要再次进行加密
+            # 以提交状态加密
 
     return render_template('doctor_medical_record.html', requests=requests,
                            medical_record=medical_record_data, message=message)
@@ -339,7 +362,12 @@ def end_consultation(request_id):
     success = False
     if update_consultation_request(request_id, 'completed'):
         # 发送通知给患者
-        patient_id = get_patient_id(request_id)
+        password = session.get('pw')
+        dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+        dc_akey = dc_akey.decode()
+        encrypted_patient_id = get_patient_id(request_id)
+        patient_id_bytes = sm2_decrypt(encrypted_patient_id, dc_akey)
+        patient_id = int(patient_id_bytes.decode('utf-8'))
         add_notification(patient_id, request_id, 'completed')
         socketio = current_app.extensions['socketio']
         # 通过 WebSocket 通知患者
