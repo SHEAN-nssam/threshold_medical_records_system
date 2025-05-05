@@ -1,0 +1,18 @@
+<!--admin_retrieve_medical_records.html-->
+{% extends "admin_dashboard.html" %}
+
+{% block title %}调取病历{% endblock %}
+{% block content %}
+<form method="post">
+    <label for="pt_id">请输入要查询的患者id：</label>
+    <input type="text" id="pt_id" name="pt_id" required>
+    <button type="submit">发起调取提议</button>
+</form>
+{% if message %}
+    <p>{{ message }}</p>
+{% endif %}
+{% endblock %}
+
+
+
+

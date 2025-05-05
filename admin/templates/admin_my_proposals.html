@@ -1,0 +1,27 @@
+{% extends "admin_dashboard.html" %}
+{% block title %}我的提议{% endblock %}
+{% block content %}
+<h2>我的提议</h2>
+{% if proposals %}
+    <ul>
+        {% for proposal in proposals %}
+            <li>
+                提议ID: {{ proposal.id }}<br>
+                患者ID: {{ proposal.patient_id }}<br>
+                状态: 
+                {% if proposal.status == 0 %}正在审批中{% endif %}
+                {% if proposal.status == 1 %}已通过{% endif %}
+                {% if proposal.status == 2 %}被拒绝{% endif %}
+                <br>
+                已同意数量: {{ proposal.approval_count }}/{{ proposal.required_approvals }}
+                <br>
+                {% if proposal.status == 1 %}
+                    <a href="{{ url_for('admin_bp.perform_action', proposal_id=proposal.id) }}">进行调取</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>您还没有发起任何提议。</p>
+{% endif %}
+{% endblock %}

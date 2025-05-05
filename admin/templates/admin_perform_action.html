@@ -1,0 +1,39 @@
+{% extends "admin_dashboard.html" %}
+{% block title %}进一步操作{% endblock %}
+{% block content %}
+<h2>进一步操作</h2>
+<p>提议ID: {{ proposal_id }}</p>
+
+<form method="post">
+    <!-- 这里可以添加进一步操作的表单元素 -->
+    <div id="records">
+                        {% if records %}
+                        <ul>
+                            {% for record in records %}
+                            <li>
+                        病历号: {{ record.id }}
+                        <p>医生号: {{ record.doctor_id }}</p>
+                        <p>患者号: {{ record.patient_id }}</p>
+                        <p>问诊申请号:{{ record.consultation_request_id }}</p>
+                        <p>病历创建时间:{{ record.created_at}}</p>
+                        <p>状态: {{ record.status }}</p>
+
+                        <p>问诊时间:{{ record.visit_date }}</p>
+                        <p>问诊科室:{{ record.department }}</p>
+                        <p>患者主诉:{{ record.patient_complaint}}</p>
+                        <p>既往病史:{{ record.medical_history }}</p>
+                        <p>体格检查:{{ record.physical_examination}}</p>
+                        <p>辅助检查:{{ record.auxiliary_examination}}</p>
+                        <p>诊断:{{ record.diagnosis}}</p>
+                        <p>处理意见:{{ record.treatment_advice}}</p>
+                        <p>医生签名:{{ record.doctor_signature}}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+        <p>No medical records now</p>
+        {% endif %}
+                        <p><a href="{{ url_for('admin_bp.ad_home') }}" class = "btn">Back to Home</a></p>
+    </div>
+</form>
+{% endblock %}

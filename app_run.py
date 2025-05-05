@@ -152,8 +152,13 @@ def initialize_database():
 
             # 生成管理员共同公私钥对，并将私钥分为三片
             ad_key, public_key = generate_sm2_key_pair()
+            print("管理员共同私钥：", type(ad_key), ad_key)
+            print("管理员共同公钥：", type(public_key), public_key)
+
+            public_key = hexstr_bytes(public_key)
             ad_key = hexstr_bytes(ad_key)
             shares = split_secret(ad_key, 2, 3)
+            print("共同私钥原始分片：", shares)
             del ad_key
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # 存储公钥到 admin_public_keys 表
@@ -167,15 +172,20 @@ def initialize_database():
             for admin in admin_users:
                 # 密码加密
                 sa = generate_salt()
-                hashed_password = generate_salt_sm3(admin["password"], sa)
-                akey, bkey = generate_sm2_key_pair()
-                tkey = generate_pbkdf2_key(admin["password"], sa)
-                akey = sm4_encrypt(akey, tkey)
-                del tkey
-                _, adksh = shares[0][share_index]
+                hashed_password = generate_salt_sm3(admin["password"], sa)  # 生成加盐哈希
+                akey, bkey = generate_sm2_key_pair()  # 生成个人的公私密钥对
+                print(f"管理员{admin['username']}的个人私钥：{akey}")
+                print(f"管理员{admin['username']}的个人公钥：{bkey}")
+                tkey = generate_pbkdf2_key(admin["password"], sa)  # 由密码和盐值生成加密私钥的临时对称密钥
+                akey = sm4_encrypt(akey, tkey)  # 加密私钥
+                del tkey  # 销毁临时对称密钥
+                sh_id, adksh = shares[share_index]  # 获取属于个人的共同私钥分片
+                adksh = sm2_encrypt(adksh, bkey)  # 使用个人公钥加密共同私钥分片，使用时需要还原私钥解密分片
+                print(f"管理员{admin['username']}的分片：{sh_id}号-{adksh}")
                 cursor.execute(
-                    "INSERT INTO admins (id, username, password, sa, a_key, b_key, adksh) VALUES (%s, %s, %s, %s, %s,%s,%s)",
-                    (admin["id"], admin["username"], hashed_password, sa, akey, bkey, adksh)
+                    "INSERT INTO admins (id, username, password, sa, a_key, b_key, adksh,sh_id) "
+                    "VALUES (%s, %s, %s, %s, %s,%s,%s,%s)",
+                    (admin["id"], admin["username"], hashed_password, sa, akey, bkey, adksh, sh_id)
                 )
                 share_index = share_index + 1
         print("admins inserted")

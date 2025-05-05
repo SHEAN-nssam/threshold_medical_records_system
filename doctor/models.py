@@ -25,6 +25,7 @@ def get_doctor_login(username):
             cursor.close()
             connection.close()
 
+
 def get_doctor_login_id(user_id):
     connection = None;cursor = None
     try:
@@ -44,6 +45,7 @@ def get_doctor_login_id(user_id):
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
+
 
 # 创建登录信息
 def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
@@ -68,6 +70,7 @@ def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
             cursor.close()
             connection.close()
 
+
 # 创建医生个人信息（待改
 def create_doctor_profile(user_id, full_name, gender, birth_date, department, title):
     connection = None;cursor = None
@@ -90,6 +93,7 @@ def create_doctor_profile(user_id, full_name, gender, birth_date, department, ti
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
+
 
 def get_doctor_profile(user_id):
     connection = None; cursor = None
@@ -136,6 +140,7 @@ def set_doctor_online(user_id):
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
+
 
 def set_doctor_offline(user_id):
     if get_doctor_login_id(user_id) is None:

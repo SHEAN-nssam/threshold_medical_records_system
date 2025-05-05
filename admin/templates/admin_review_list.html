@@ -1,35 +1,10 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Records need to be reviewed</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-<div class="container">
-        <header>
-            <h1>医疗系统</h1>
-        </header>
 
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
-                <div class="function-buttons">
-                    <a href="{{ url_for('admin_bp.review_list') }}" class="function-button purple">
-                        <h3>审核病历</h3>
-                        <p>审核和管理病历记录</p>
-                    </a>
+{% extends "admin_dashboard.html" %}
 
-                </div>
-            </div>
+{% block title %}审核列表{% endblock %}
 
-            <div class="main-content">
-
-                <div class="content-area">
-                    <!-- 这里可以放置具体页面的内容 -->
-                     <h2>Medical Records not review</h2>
-    <div id="records">
+{% block content %}
+<div id="records">
         {% if records %}
             <ul>
                 {% for record in records %}
@@ -48,21 +23,6 @@
         {% endif %}
             <p><a href="{{ url_for('admin_bp.ad_home') }}" class="btn">Back to Home</a></p>
     </div>
-                </div>
-            </div>
-        </div>
+{% endblock %}
 
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
-    </div>
 
-    <script>
-        function logout() {
-            // 处理退出登录的逻辑
-            window.location.href = "{{ url_for('admin_bp.logout') }}";
-        }
-    </script>
-
-</body>
-</html>

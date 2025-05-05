@@ -1,0 +1,33 @@
+{% extends "admin_dashboard.html" %}
+{% block title %}审核提议{% endblock %}
+{% block content %}
+<h2>审核提议</h2>
+{% if message %}
+        <p style="color: green;"> {{ message }}</p>
+{% endif %}
+{% if proposals %}
+    <ul>
+        {% for proposal in proposals %}
+            <li>
+                提议ID: {{ proposal.id }}<br>
+                发起管理员: {{ proposal.propose_admin }}<br>
+                患者ID: {{ proposal.patient_id }}<br>
+                状态: 
+                {% if proposal.status == 0 %}正在审批中{% endif %}
+                {% if proposal.status == 1 %}已通过{% endif %}
+                {% if proposal.status == 2 %}被拒绝{% endif %}
+                <br>
+                已同意数量: {{ proposal.approval_count }}/{{ proposal.required_approvals }}
+                <br>
+                {% if proposal.status == 0 %}
+                    <form method="post" action="{{ url_for('admin_bp.pass_proposal', proposal_id=proposal.id) }}">
+                        <button type="submit">同意提议</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>没有需要审核的提议。</p>
+{% endif %}
+{% endblock %}

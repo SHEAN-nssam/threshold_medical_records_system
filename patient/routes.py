@@ -216,6 +216,7 @@ def send_request(doctor_id):
         # 通过 current_app 访问 socketio 实例
         socketio = current_app.extensions['socketio']
         socketio.emit('new_request', {'doctor_id': doctor_id}, room=f'doctor_{doctor_id}')
+
         message = 'Request sent successfully.'
     else:
         message = 'Failed to send request.'
@@ -242,7 +243,6 @@ def medical_records():
     if request.method == 'POST':
         pwd = request.form.get('input')
     # print(pwd)
-    # 此处添加密码验证逻辑
         username = current_user.username
         results = get_patient_login(username)
         stored_password = results['password']
@@ -254,7 +254,7 @@ def medical_records():
         print(pwd)
         akey = get_patient_akey(current_user.id, pwd)  # 因为加密时会将字符串encode，所以解密时使用decode恢复字符串，但注意此处本质是hexstr
         akey = akey.decode()
-        # 函数有待编写
+
         records = get_medical_records(current_user.id)
         print(records)
         for record in records:
@@ -265,8 +265,9 @@ def medical_records():
             mr_pt_sh = (2, mr_pt_sh)
             mr_sv_sh = (1, record['server_share'])
             to_combine = [mr_sv_sh, mr_pt_sh]
-            mr_tkey = combine_secret([to_combine], 2)
+            mr_tkey = combine_secret(to_combine, 2)
             mr_tkey = bytes_hexstr(mr_tkey)
+            print("患者端获得的病历对称密钥：", mr_tkey)
 
             cr_id = sm4_decrypt(record["consultation_request_id"], mr_tkey)
             cr_id = int(cr_id.decode('utf-8'))
@@ -311,8 +312,8 @@ def medical_records():
             treatment_advice = sm4_decrypt(record["treatment_advice"], mr_tkey)
             treatment_advice = treatment_advice.decode()
             print("treatment_advice:", treatment_advice)
-            record["treatment_advice"]=treatment_advice
-
+            record["treatment_advice"] = treatment_advice
+        del akey
     return render_template('patient_medical_records.html', records=records)
 
 

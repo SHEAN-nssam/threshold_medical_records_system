@@ -17,7 +17,8 @@
 		{"name": "sa","type":"TINYBLOB","constraints":"NOT NULL"},
 		{"name": "a_key","type":"TINYBLOB","constraints":"NOT NULL"},
 		{"name": "b_key","type":"VARCHAR(130)","constraints":"NOT NULL"},
-        {"name": "adksh","type": "TINYBLOB","constraints":"NOT NULL"}
+        {"name": "adksh","type": "TINYBLOB","constraints":"NOT NULL"},
+        {"name": "sh_id","type": "INT", "constraints": "UNIQUE NOT NULL"}
       ]
     },
     {
@@ -195,6 +196,35 @@
       "foreign_keys": [
         {"column": "mr_id", "references": "archived_medical_records(id)"},
         {"column": "review_by", "references": "admins(id)"}
+      ]
+    },
+    {
+      "name": "retrieve_proposals",
+      "columns": [
+        {"name": "id", "type": "INT", "constraints": "PRIMARY KEY AUTO_INCREMENT"},
+        {"name": "propose_admin", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "patient_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "status", "type": "INT", "constraints": "NOT NULL DEFAULT 0"},
+        {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"},
+        {"name": "approving_admins", "type": "TEXT", "constraints": "NOT NULL"},
+        {"name": "approval_count", "type": "INT", "constraints": "NOT NULL DEFAULT 1"},
+        {"name": "required_approvals","type": "INT","constraints":"NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "propose_admin", "references": "admins(id)"},
+        {"column": "patient_id", "references": "patients(id)"}
+      ]
+    },
+    {
+      "name": "retrieve_shares",
+      "columns": [
+        {"name": "proposal_id", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "admin", "type": "INT", "constraints": "NOT NULL"},
+        {"name": "share", "type": "TINYBLOB", "constraints": "NOT NULL"}
+      ],
+      "foreign_keys": [
+        {"column": "proposal_id", "references": "retrieve_proposals(id)"},
+        {"column": "admin", "references": "admins(id)"}
       ]
     }
   ]

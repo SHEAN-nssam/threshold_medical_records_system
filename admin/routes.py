@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for,jsonify
+from flask import Blueprint, render_template, request, redirect, url_for,session,jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
@@ -32,6 +32,11 @@ def login():
                 if check_salt_sm3(password, sa, stored_password):
                     user = User(results['id'], results['username'], 'patient')
                     login_user(user)
+                    # 将管理员的登录信息存储到 session 中
+                    session['admin_id'] = results['id']
+                    session['admin_username'] = results['username']
+                    session['pw'] = password
+
                     return redirect(url_for('admin_bp.ad_home'))
                 else:
                     message = 'Invalid password. Please try again.'
@@ -121,7 +126,7 @@ def ad_home():
 @login_required
 def review_list():
     me_records = get_medical_records_waiting_review()
-    print(me_records)
+    # print(me_records)
     return render_template('admin_review_list.html', records=me_records)
 
 
@@ -131,7 +136,7 @@ def review_record(record_id):
     message = None
     medical_record = get_medical_record(record_id)
     ori_cr_id = medical_record["consultation_request_id"]
-    print("原本的medical_record:",medical_record)
+    print("原本的medical_record:", medical_record)
     if request.method == 'POST':
         review_opinions = request.form['review_opinions']
         action = request.form['action']
@@ -154,12 +159,12 @@ def review_record(record_id):
             medical_record["treatment_advice"] = sm4_encrypt(medical_record["treatment_advice"], mr_key)
             # 密钥分片 分片均为字节串格式
             mr_key = hexstr_bytes(mr_key)
-            print("加密病历用的sm4对称密钥",mr_key)
+            print("加密病历用的sm4对称密钥", mr_key)
             shares = split_secret(mr_key, 2, 3)
             del mr_key
-            _, sv_share = shares[0][0]
-            _, pt_share = shares[0][1]
-            _, ad_share = shares[0][2]
+            _, sv_share = shares[0]
+            _, pt_share = shares[1]
+            _, ad_share = shares[2]
             print("服务器分片明文：", sv_share)
             print("患者分片明文：", pt_share)
             print("管理员分片明文", ad_share)
@@ -171,6 +176,7 @@ def review_record(record_id):
             print("患者分片密文：", pt_share)
             # 设置管理员共同公钥
             ad_bkey = get_admin_public_key()
+
             ad_share = sm2_encrypt(ad_share, ad_bkey)
             print("管理员分片密文：", ad_share)
             print("medical_record:", medical_record)
@@ -194,8 +200,171 @@ def review_record(record_id):
 
 
 # 查看已有分片的功能
-
 # 管理员的分片共同通过解密机制
+
+@admin_bp.route('/retrieve_medical_records', methods=['GET', 'POST'])
+@login_required
+def retrieve_medical_records():
+    message = ""
+    if request.method == 'POST':
+        patient_id = request.form['pt_id']
+        # print(patient_id)
+        admin_id = current_user.id  # 假设 current_user 是登录的管理员
+
+        # 调用函数创建调取提议
+        success = create_retrieve_proposal(admin_id, patient_id)
+
+        if success:
+            message = "提议创建成功"
+        else:
+            message = "提议创建失败"
+    return render_template('admin_retrieve_medical_records.html', message=message)
+
+# 编写两个新的路由函数，一个用于查看自己之前提出的提议，如果提议被通过了，可以通过此页面进行后续调度
+# 一个用于查看其他人提出的提议，选择是否同意其他人的提议
+
+@admin_bp.route('/review_proposals', methods=['GET'])
+@login_required
+def review_proposals():
+    admin_id = current_user.id  # 假设 current_user 是登录的管理员
+    proposals = get_other_proposals(admin_id)
+
+    return render_template('admin_review_proposals.html', proposals=proposals)
+
+
+@admin_bp.route('/pass_proposal/<int:proposal_id>', methods=['POST'])
+@login_required
+def pass_proposal(proposal_id):
+    message = ""
+    admin_id = current_user.id  # 假设 current_user 是登录的管理员
+    share = get_admin_login(current_user.username)['adksh']  # 获取个人分片
+    admin_bkey = get_propose_admin_bkey(proposal_id)
+    # 个人分片解密
+    password = session.get('pw')
+    ad_akey = get_admin_akey(current_user.id, password)  # bytes
+    ad_akey = ad_akey.decode()
+    share = sm2_decrypt(share, ad_akey)
+    del ad_akey
+
+    en_share = sm2_encrypt(share, admin_bkey)
+    del share
+    # 调用函数更新提议状态
+    success = pass_retrieve_proposal(proposal_id, admin_id, en_share)
+
+    if success:
+        message="提议已同意"
+    else:
+        message="同意提议失败"
+    return render_template('admin_review_proposals.html', message=message)
+
+
+@admin_bp.route('/my_proposals', methods=['GET'])
+@login_required
+def my_proposals():
+    admin_id = current_user.id  # 假设 current_user 是登录的管理员
+    proposals = get_own_proposals(admin_id)
+    return render_template('admin_my_proposals.html', proposals=proposals)
+
+
+@admin_bp.route('/perform_action/<int:proposal_id>', methods=['GET'])
+@login_required
+def perform_action(proposal_id):
+    pt_id = get_propose_patient(proposal_id)
+    pt_records = get_medical_records_by_patient(pt_id)
+    # 获取个人私钥
+    password = session.get('pw')
+    ad_akey = get_admin_akey(current_user.id, password)  # bytes
+    ad_akey = ad_akey.decode()
+    to_combine = []
+
+    # 需要解密自己的分片
+    my_share = get_admin_login(current_user.username)['adksh']  # 获取个人分片
+    my_share = sm2_decrypt(my_share, ad_akey)
+    mysh_id = get_share_id(current_user.id)
+    to_combine.append((mysh_id, my_share))
+    # 调取数据库中retrieve_shares中所有提议号对应的分片
+    pro_shares = get_proposal_shares(proposal_id)
+    # 分片号到admins表中查找
+    for share in pro_shares:
+        sh_id = get_share_id(share['admin'])
+        de_share = sm2_decrypt(share['share'], ad_akey)
+        to_combine.append((sh_id, de_share))
+
+    # print(to_combine)
+    # 获取最低的门限数量（从proposal表中
+    min = get_proposal_min(proposal_id)
+    # 还原共同私钥
+    mr_ad_akey = combine_secret(to_combine, min)
+    mr_ad_akey = bytes_hexstr(mr_ad_akey)
+    print("共同密钥-私钥：", mr_ad_akey)
+    print("共同密钥-公钥：", get_admin_public_key())
+    del ad_akey
+    # mr_ad_akey = bytes_hexstr(mr_ad_akey)
+    # 解密患者病历
+    # 暂时先显示在页面上，如果可以实现再考虑以什么格式导出
+    # print(pt_records)
+    for record in pt_records:
+        mr_ad_sh = get_ad_sh_by_medical_record(record['id'])['sh']
+        print("en mr_ad_sh:", mr_ad_sh)
+        mr_ad_sh = sm2_decrypt(mr_ad_sh, mr_ad_akey)
+        print("mr_ad_sh:", mr_ad_sh)
+
+        mr_ad_sh = (3, mr_ad_sh)
+        mr_sv_sh = (1, record['server_share'])
+        to_combine = [mr_sv_sh, mr_ad_sh]
+        print("还原病历对称密钥时使用的分片列表：", to_combine)
+        mr_tkey = combine_secret(to_combine, 2)
+        mr_tkey = bytes_hexstr(mr_tkey)
+        print("mr_teky:", mr_tkey)
+
+        print("record-consultation_request_id:", record["consultation_request_id"])
+        cr_id = sm4_decrypt(record["consultation_request_id"], mr_tkey)
+        print("cr_id:", cr_id)
+        cr_id = int(cr_id.decode('utf-8'))
+        record["consultation_request_id"] = cr_id
+
+        dc_id = sm4_decrypt(record["doctor_id"], mr_tkey)
+        dc_id = int(dc_id.decode('utf-8'))
+        print("dc_id:", dc_id)
+        record["doctor_id"] = dc_id
+
+        vi_da = sm4_decrypt(record["visit_date"], mr_tkey)
+        vi_da = vi_da.decode()
+        vi_da = str_to_datetime(vi_da)
+        print("vi_da:", vi_da)
+        record["visit_date"] = vi_da
+
+        department = sm4_decrypt(record["department"], mr_tkey)
+        department = department.decode()
+        print("department:", department)
+        record["department"] = department
+        patient_complaint = sm4_decrypt(record["patient_complaint"], mr_tkey)
+        patient_complaint = patient_complaint.decode()
+        print("patient_complaint:", patient_complaint)
+        record["patient_complaint"] = patient_complaint
+        medical_history = sm4_decrypt(record["medical_history"], mr_tkey)
+        medical_history = medical_history.decode()
+        print("medical_history:", medical_history)
+        record["medical_history"] = medical_history
+        physical_examination = sm4_decrypt(record["physical_examination"], mr_tkey)
+        physical_examination = physical_examination.decode()
+        print("physical_examination:", physical_examination)
+        record["physical_examination"]=physical_examination
+        auxiliary_examination = sm4_decrypt(record["auxiliary_examination"], mr_tkey)
+        auxiliary_examination = auxiliary_examination.decode()
+        print("auxiliary_examination:", auxiliary_examination)
+        record["auxiliary_examination"] = auxiliary_examination
+        diagnosis = sm4_decrypt(record["diagnosis"], mr_tkey)
+        diagnosis = diagnosis.decode()
+        print("diagnosis:", diagnosis)
+        record["diagnosis"] = diagnosis
+        treatment_advice = sm4_decrypt(record["treatment_advice"], mr_tkey)
+        treatment_advice = treatment_advice.decode()
+        print("treatment_advice:", treatment_advice)
+        record["treatment_advice"] = treatment_advice
+    del mr_ad_akey
+
+    return render_template('admin_perform_action.html', proposal_id=proposal_id,records = pt_records )
 
 
 # 注销功能

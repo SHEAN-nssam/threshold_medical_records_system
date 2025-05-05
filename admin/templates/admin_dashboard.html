@@ -1,11 +1,25 @@
-
+<!--admin_dashboard.html-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员主页</title>
+    <title>{% block title %}管理员主页{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/main.css">
+    <style>
+        /* 浮窗样式 */
+        #float-window {
+            display: none;
+            position: absolute; /* 使用绝对定位使其成为浮窗 */
+            top: 0px; /* 距离顶部0px */
+            right: 0px; /* 距离右侧0px */
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            z-index: 1000; /* 确保浮窗在最上层 */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -19,19 +33,29 @@
                 <div class="function-buttons">
                     <a href="{{ url_for('admin_bp.review_list') }}" class="function-button purple">
                         <h3>审核病历</h3>
-                        <p>审核和管理病历记录</p>
                     </a>
-
+                    <a href="{{ url_for('admin_bp.retrieve_medical_records') }}" class="function-button blue">
+                        <h3>调取病历</h3>
+                    </a>
+                    <a href="{{ url_for('admin_bp.review_proposals') }}" class="function-button green">
+                        <h3>审核调取提议</h3>
+                    </a>
+                    <a href="{{ url_for('admin_bp.my_proposals') }}" class="function-button orange">
+                        <h3>我发起的提议</h3>
+                    </a>
                 </div>
             </div>
 
             <div class="main-content">
-                <h2>欢迎，管理员 {{ username }}!</h2>
-                <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
+
 
                 <div class="content-area">
                     <!-- 这里可以放置具体页面的内容 -->
+                    {% block content %}
+                    <h2>欢迎，管理员 {{ username }}!</h2>
+                    <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
                     <p>这是管理员主页内容区域。</p>
+                    {% endblock %}
                 </div>
             </div>
         </div>
@@ -45,6 +69,23 @@
         function logout() {
             // 处理退出登录的逻辑
             window.location.href = "{{ url_for('admin_bp.logout') }}";
+        }
+
+         // 显示浮窗
+        function showFloatWindow() {
+            document.getElementById('float-window').style.display = 'block';
+        }
+
+        // 隐藏浮窗
+        function hideFloatWindow() {
+            document.getElementById('float-window').style.display = 'none';
+        }
+
+        // 处理浮窗选项选择
+        function selectOption(choice) {
+            alert(`您选择了：${choice}`);
+            hideFloatWindow();
+            // 这里可以将选择结果发送到后端
         }
     </script>
 </body>
