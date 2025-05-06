@@ -1,7 +1,7 @@
 {% extends "admin_dashboard.html" %}
 {% block title %}进一步操作{% endblock %}
 {% block content %}
-<h2>进一步操作</h2>
+<h2>提议执行</h2>
 <p>提议ID: {{ proposal_id }}</p>
 
 <form method="post">
@@ -33,7 +33,9 @@
         {% else %}
         <p>No medical records now</p>
         {% endif %}
-                        <p><a href="{{ url_for('admin_bp.ad_home') }}" class = "btn">Back to Home</a></p>
+        <!-- 下载按钮 -->
+        <a href="{{ url_for('admin_bp.perform_action', proposal_id=proposal_id, download='true') }}" class="btn">下载病历</a>
+        <p><a href="{{ url_for('admin_bp.ad_home') }}" class = "btn">Back to Home</a></p>
     </div>
 </form>
 {% endblock %}

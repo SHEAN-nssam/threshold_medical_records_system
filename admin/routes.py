@@ -1,7 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for,session,jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
+import json
+import tempfile
+import os
+from datetime import datetime
 from mysql.connector import Error
 from config import User  # 假设 User 类在 app.py 中定义
 from admin.models import *
@@ -87,6 +91,7 @@ def register():
 
     return render_template('admin_register.html', message=message)
 
+# 增加修改个人用户名和密码的功能
 
 def generate_admin_id():
     connection = None
@@ -362,9 +367,61 @@ def perform_action(proposal_id):
         treatment_advice = treatment_advice.decode()
         print("treatment_advice:", treatment_advice)
         record["treatment_advice"] = treatment_advice
+        record["doctor_signature"] = record["doctor_signature"].decode()
     del mr_ad_akey
 
-    return render_template('admin_perform_action.html', proposal_id=proposal_id,records = pt_records )
+    to_cal = f"{record['consultation_request_id']}-{record['patient_complaint']}-{record['medical_history']}-" \
+             f"{record['physical_examination']}-{record['auxiliary_examination']}-{record['diagnosis']}-{record['treatment_advice']}"
+
+    # 创建用于存储病历的字典列表
+    medical_records_list = []
+    for record in pt_records:
+        # 将记录转换为字典
+        record_dict = {
+            "medical_record_id": record["id"],
+            "patient_id": record["patient_id"],
+            "doctor_id": record["doctor_id"],
+            "consultation_request_id": record["consultation_request_id"],
+            "visit_date": record["visit_date"].strftime('%Y-%m-%d %H:%M:%S')
+            if isinstance(record["visit_date"], datetime) else record["visit_date"],
+            "department": record["department"],
+            "patient_complaint": record["patient_complaint"],
+            "medical_history": record["medical_history"],
+            "physical_examination": record["physical_examination"],
+            "auxiliary_examination": record["auxiliary_examination"],
+            "diagnosis": record["diagnosis"],
+            "treatment_advice": record["treatment_advice"],
+            "doctor_signature": record["doctor_signature"],
+            "created_at": record["created_at"].strftime('%Y-%m-%d %H:%M:%S')
+            if isinstance(record["created_at"], datetime) else record["created_at"],
+            "doctor_public_key": get_doctor_key(record["doctor_id"])['b_key'],
+            "to_cal": to_cal,
+            "to_verify_signature": generate_sm3_hash(to_cal)
+        }
+        medical_records_list.append(record_dict)
+    '''
+    # 定义 JSON 文件的路径和名称
+    json_file_path = f"medical_records_proposal_{proposal_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+    # 将字典列表写入 JSON 文件
+    with open(json_file_path, 'w', encoding='utf-8') as json_file:
+        json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
+    '''
+    # 检查请求中是否包含下载参数
+    if request.args.get('download') == 'true':
+        # 创建一个临时文件
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as temp_file:
+            json_file_path = temp_file.name
+            # 将字典列表写入临时 JSON 文件
+            with open(json_file_path, 'w', encoding='utf-8') as json_file:
+                json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
+        # 发送文件给用户
+        return send_file(json_file_path, as_attachment=True,download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+        os.unlink(json_file_path)
+    else:
+        # 渲染页面
+        return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
+    # return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
 
 
 # 注销功能

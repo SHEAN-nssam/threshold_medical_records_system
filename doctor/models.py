@@ -16,6 +16,8 @@ def get_doctor_login(username):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_doctor_login_Error: {e}")
         return None
@@ -37,6 +39,8 @@ def get_doctor_login_id(user_id):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_doctor_login_Error: {e}")
         return None
@@ -61,6 +65,8 @@ def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_doctor_login_Error: {e}")
         return False
@@ -85,6 +91,8 @@ def create_doctor_profile(user_id, full_name, gender, birth_date, department, ti
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_doctor_profile_Error: {e}")
         return False
@@ -106,6 +114,8 @@ def get_doctor_profile(user_id):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_doctor_login_Error: {e}")
         return None
@@ -132,6 +142,8 @@ def set_doctor_online(user_id):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"set_doctor_online_Error: {e}")
         return False
@@ -157,6 +169,8 @@ def set_doctor_offline(user_id):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"set_doctor_offline_Error: {e}")
         return False
@@ -182,6 +196,8 @@ def get_doctor_akey(doctor_id, password):
         tkey = generate_pbkdf2_key(password, salt)
         akey = sm4_decrypt(result['a_key'], tkey)
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_doctor_akey_Error: {e}")
     finally:
@@ -210,6 +226,8 @@ def get_patient_key(pt_id):
         )
         pt_key = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_key: {e}")
     finally:
         if connection and connection.is_connected():
@@ -237,6 +255,8 @@ def get_consultation_requests(doctor_id):
             '''
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_consultation_requests: {e}")
     finally:
         if connection and connection.is_connected():
@@ -259,6 +279,8 @@ def update_consultation_request(request_id, status):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in update_consultation_request: {e}")
     finally:
         if connection and connection.is_connected():
@@ -279,6 +301,8 @@ def get_patient_id(request_id):
         if result:
             patient_id = result[0]
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_id: {e}")
     finally:
         if connection and connection.is_connected():
@@ -344,6 +368,8 @@ def add_notification(patient_id, consultation_request_id, status):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in add_notification: {e}")
     finally:
         if connection and connection.is_connected():
@@ -365,6 +391,8 @@ def get_active_consultation_requests(doctor_id):
         )
         requests = cursor.fetchall()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_active_consultation_requests: {e}")
     finally:
         if connection and connection.is_connected():
@@ -418,6 +446,8 @@ def create_medical_record(consultation_request_id,patient_id):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in create_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
@@ -463,6 +493,8 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in update_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
@@ -509,6 +541,8 @@ def submit_medical_record(record_id):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in submit_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
@@ -553,6 +587,8 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in update_medical_record_by_request: {e}")
     finally:
         if connection and connection.is_connected():
@@ -561,10 +597,11 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
     return success
 
 
-def submit_medical_record_by_request(request_id):
+def submit_medical_record_by_request(request_id, doctor_signature):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
     :param request_id: 病历记录ID
+    doctor_signature:医生电子签名
     :return: 提交成功返回 True，否则返回 False
     """
     connection = None
@@ -584,7 +621,7 @@ def submit_medical_record_by_request(request_id):
         doctor_id = medical_record['doctor_id']
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # 签名格式错误，待更改
-        doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
+        # doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
 
         # 更新病历状态和签名
         cursor.execute(
@@ -601,6 +638,8 @@ def submit_medical_record_by_request(request_id):
 
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in submit_medical_record_by_request: {e}")
     finally:
         if connection and connection.is_connected():
@@ -627,6 +666,8 @@ def get_medical_record(record_id):
         )
         medical_record = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
@@ -654,6 +695,8 @@ def get_medical_records_by_request(request_id):
         medical_records = cursor.fetchone()
         # print(f"{request_id}request-find-{medical_records}")
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_medical_records_by_request: {e}")
     finally:
         if connection and connection.is_connected():
@@ -683,6 +726,8 @@ def get_records_correct(doctor_id):
         cursor.execute(f"SELECT * FROM review_records WHERE mr_id in ({placeholders})", mr_id)
         review_records = cursor.fetchall()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_medical_records_by_request: {e}")
     finally:
         if connection and connection.is_connected():
@@ -708,6 +753,8 @@ def get_review_record(review_record_id):
         )
         review_record = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_review_record: {e}")
     finally:
         if connection and connection.is_connected():

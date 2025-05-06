@@ -69,7 +69,35 @@ def generate_sm2_key_pair():  # 生成密钥为str格式
     public_key_str = "04" + public_key
     return private_key, public_key_str
 
-from gmssl import sm2
+
+def generate_valid_sm2_key_pair():
+    """
+    生成并验证 SM2 密钥对是否匹配，直到找到匹配的密钥对。
+    :return: private_key, public_key_str
+    """
+    while True:
+        # 生成密钥对
+        private_key, public_key_str = generate_sm2_key_pair()
+
+        # 创建 SM2 加密对象
+        sm2_crypt = sm2.CryptSM2(public_key=public_key_str, private_key=private_key)
+        # 随机生成测试明文
+        plaintext = func.random_hex(64)  # 生成随机明文
+        plaintext = plaintext.encode('utf-8')
+        try:
+            # 加密
+            ciphertext = sm2_crypt.encrypt(plaintext)
+            # 解密
+            decrypted_text = sm2_crypt.decrypt(ciphertext)
+            # 验证解密后的明文是否与原始明文一致
+            if decrypted_text == plaintext:
+                print("找到匹配的密钥对！")
+                return private_key, public_key_str
+            else:
+                print("密钥对不匹配，重新生成...")
+        except Exception as e:
+            print(f"验证失败，错误信息：{e}，重新生成...")
+            continue
 
 
 def sm2_encrypt(data, public_key):  # 生成加密数据为bytes格式
@@ -509,8 +537,9 @@ if __name__ == "__main__":
     管理员共同私钥： <class 'str'> 9949f08843fef734f721d873406bcf23432fc796928b833c6e4d4cd10a727888
     管理员共同公钥： <class 'str'> 0437e566c0e007f84775e84d5935f70ade0d6aac32acb658d10c634f289d778ef8bdd5742c9a095ad0df371ba00bbc32db93ea8263586d388839026a05e3d35bff
     '''
-    akey = '9949f08843fef734f721d873406bcf23432fc796928b833c6e4d4cd10a727888'
-    bkey = '0437e566c0e007f84775e84d5935f70ade0d6aac32acb658d10c634f289d778ef8bdd5742c9a095ad0df371ba00bbc32db93ea8263586d388839026a05e3d35bff'
+    # akey = '9949f08843fef734f721d873406bcf23432fc796928b833c6e4d4cd10a727888'
+    # bkey = '0437e566c0e007f84775e84d5935f70ade0d6aac32acb658d10c634f289d778ef8bdd5742c9a095ad0df371ba00bbc32db93ea8263586d388839026a05e3d35bff'
+    akey, bkey = generate_valid_sm2_key_pair()
     print("私钥：", type(akey), akey)
     print("公钥：", type(bkey), bkey)
     en_data = sm2_encrypt(data, bkey)
@@ -518,16 +547,18 @@ if __name__ == "__main__":
     de_data = sm2_decrypt(en_data, akey)
     print(de_data)
 
-    print()
+    sign = sm2_sign(data, akey)
+    print(sign)
+    print(len(sign))
+    re = sm2_verify(sign, data, bkey)
+    print(re)
 
-    akey = hexstr_bytes(akey)
-    bkey = hexstr_bytes(bkey)
-    print("私钥：", len(akey), akey)
-    print("公钥：", len(bkey), bkey)
-    en_data = sm2_encrypt(data, bkey)
-    print(en_data)
-    de_data = sm2_decrypt(en_data, akey)
-    print(de_data)
+    sign = "f891ec71c8428aca6668559f9d925363f67ea3487ae7dcaec484d76d9dc6164b56ba0401e2bea902483ce9963a8c6a0e15197874cdeba30e71935cc9fa2fd7fd"
+    bkey = "04cc2cebd9fdd6ff8c182eca294b6d32663dd2693fbda6adcfe81df554e9788b6ffc346d02f8211229d85eeab5095b89a5e139c19be173894ecc28a4b12d9a4909"
+    to_cal = "1-zzz-xxx-ccc-vvv-bbb-nnn"
+    to_verify = generate_sm3_hash(to_cal)
+    re = sm2_verify(sign, to_verify, bkey)
+    print("正式验签结果：", re)
 
     print(data.encode() == de_data)
 '''

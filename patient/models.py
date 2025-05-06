@@ -17,6 +17,8 @@ def get_patient_login(username):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_patient_login_Error: {e}")
         return None
@@ -29,7 +31,7 @@ def get_patient_login(username):
 
 # 创建患者登录信息
 def create_patient_login(user_id, username, password_hash, salt, akey, bkey):
-    connection = None;cursor = None
+    connection = None; cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -71,6 +73,8 @@ def get_patient_akey(patient_id,password):
         tkey = generate_pbkdf2_key(password, salt)
         akey = sm4_decrypt(result['a_key'], tkey)
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_patient_akey_Error: {e}")
     finally:
@@ -91,6 +95,8 @@ def get_patient_profile(user_id):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_patient_profile_Error: {e}")
         return None
@@ -166,6 +172,8 @@ def get_online_doctors():
         online_doctors = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_online_doctors: {e}")
     finally:
         if connection and connection.is_connected():
@@ -186,6 +194,8 @@ def get_doctor_key(doc_id):
         cursor.execute("SELECT b_key FROM doctors WHERE id = %s", (doc_id,))
         dkey = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_online_doctors: {e}")
     finally:
         if connection and connection.is_connected():
@@ -234,6 +244,8 @@ def get_patient_notifications(patient_id):
         )
         notifications = cursor.fetchall()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_notifications: {e}")
     finally:
         if connection and connection.is_connected():
@@ -265,6 +277,8 @@ def get_medical_records(user_id):
         )
         mr = cursor.fetchall()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_notifications: {e}")
     finally:
         if connection and connection.is_connected():
@@ -286,6 +300,8 @@ def get_pt_sh_by_medical_record(mr_id):
         )
         sh = cursor.fetchone()  # 此处的分片还是由患者公钥加密的状态
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_notifications: {e}")
     finally:
         if connection and connection.is_connected():

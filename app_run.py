@@ -1,4 +1,4 @@
-from flask import Flask,render_template, jsonify,request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import json
 import mysql.connector
@@ -151,7 +151,7 @@ def initialize_database():
             ]
 
             # 生成管理员共同公私钥对，并将私钥分为三片
-            ad_key, public_key = generate_sm2_key_pair()
+            ad_key, public_key = generate_valid_sm2_key_pair()
             print("管理员共同私钥：", type(ad_key), ad_key)
             print("管理员共同公钥：", type(public_key), public_key)
 

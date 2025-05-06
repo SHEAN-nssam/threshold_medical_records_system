@@ -18,6 +18,8 @@ def get_admin_login(username):
         # 返回查询结果
         return cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_admin_login_Error: {e}")
         return None
@@ -43,6 +45,8 @@ def create_admin_login(user_id, username, password_hash, salt, akey, bkey):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_admin_login_Error: {e}")
         return False
@@ -68,6 +72,8 @@ def get_admin_akey(admin_id, password):
         tkey = generate_pbkdf2_key(password, salt)
         akey = sm4_decrypt(result['a_key'], tkey)
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_get_doctor_akey_Error: {e}")
     finally:
@@ -92,6 +98,8 @@ def get_medical_record(record_id):
         )
         medical_record = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
@@ -120,6 +128,8 @@ def get_medical_records_waiting_review():
             print("no record")
             '''
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_medical_records_waiting_review_Error: {e}")
     finally:
@@ -148,6 +158,8 @@ def get_admin_public_key():
             public_key = result["public_key"]
             public_key = bytes_hexstr(public_key)
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error: {e}")
     finally:
         if connection and connection.is_connected():
@@ -210,9 +222,9 @@ def approve_medical_record(record_id, mr, server_share):
         connection.commit()
         success = True
     except Error as e:
-        print(f"approve_medical_record_Error: {e}")
-        if connection:
+        if connection and connection.is_connected():
             connection.rollback()
+        print(f"approve_medical_record_Error: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
@@ -238,6 +250,8 @@ def get_patient_key(pt_id):
         )
         pt_key = cursor.fetchone()
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_patient_key: {e}")
     finally:
         if connection and connection.is_connected():
@@ -262,6 +276,8 @@ def insert_patient_share(mrid,pt_share):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"insert_patient_share_Error: {e}")
     finally:
@@ -287,6 +303,8 @@ def insert_admin_share(mrid,ad_share):
         connection.commit()
         success=True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"insert_patient_share_Error: {e}")
     finally:
@@ -318,9 +336,9 @@ def reject_medical_record(record_id):
         connection.commit()
         success = True
     except Error as e:
-        print(f"reject_medical_record_Error: {e}")
-        if connection:
+        if connection and connection.is_connected():
             connection.rollback()
+        print(f"reject_medical_record_Error: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
@@ -348,6 +366,8 @@ def create_review_record_pass(mr_id,ad_id):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"create_review_record_pass_Error: {e}")
         return False
@@ -381,6 +401,8 @@ def create_review_record_not_pass(mr_id,ad_id,opi):
         connection.commit()
         return True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"create_review_record_not_pass_Error: {e}")
         return False
@@ -404,6 +426,8 @@ def get_medical_records_by_patient(pt_id):
         pt_records = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_medical_records_by_patient_Error: {e}")
     finally:
@@ -443,6 +467,8 @@ def create_retrieve_proposal(ad_id, pt_id):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_create_admin_login_Error: {e}")
     finally:
@@ -476,6 +502,8 @@ def get_propose_admin_bkey(proposal_id):
         admin_bkey = cursor.fetchone()['b_key']
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_propose_admin_bkey_Error: {e}")
     finally:
@@ -506,6 +534,8 @@ def get_propose_patient(proposal_id):
         pt_id = result['patient_id']
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_propose_admin_bkey_Error: {e}")
     finally:
@@ -531,6 +561,8 @@ def get_proposals():
         proposals = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposals_Error: {e}")
     finally:
@@ -555,6 +587,8 @@ def get_own_proposals(ad_id):
         proposals = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposals_Error: {e}")
     finally:
@@ -578,6 +612,8 @@ def get_other_proposals(ad_id):
         proposals = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposals_Error: {e}")
     finally:
@@ -659,6 +695,8 @@ def pass_retrieve_proposal(proposal_id, ad_id, en_share):
         connection.commit()
         success = True
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"models_pass_retrieve_proposal_Error: {e}")
     finally:
@@ -683,6 +721,8 @@ def get_proposal_shares(proposal_id):
         shares = cursor.fetchall()
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposal_shares_Error: {e}")
     finally:
@@ -706,6 +746,8 @@ def get_share_id(ad_id):
         share_id = cursor.fetchone()['sh_id']
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposal_shares_Error: {e}")
     finally:
@@ -730,6 +772,8 @@ def get_proposal_min(proposal_id):
         min = cursor.fetchone()['required_approvals']
 
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         # 打印错误信息
         print(f"get_proposal_min_Error: {e}")
     finally:
@@ -754,12 +798,36 @@ def get_ad_sh_by_medical_record(mr_id):
         )
         sh = cursor.fetchone()  # 此处的分片还是由公钥加密的状态
     except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
         print(f"Error in get_ad_sh_by_medical_record: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
     return sh
+
+
+def get_doctor_key(doc_id):
+    connection = None
+    cursor = None
+    dkey = None
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # 获取所有在线医生的ID
+        cursor.execute("SELECT b_key FROM doctors WHERE id = %s", (doc_id,))
+        dkey = cursor.fetchone()
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        print(f"Error in get_online_doctors: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return dkey
 
 
 if __name__ == '__main__':

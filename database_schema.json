@@ -100,7 +100,7 @@
         {"name": "auxiliary_examination", "type": "TEXT"},
         {"name": "diagnosis", "type": "TEXT"},
         {"name": "treatment_advice", "type": "TEXT"},
-        {"name": "doctor_signature", "type": "VARCHAR(100)"},
+        {"name": "doctor_signature", "type": "VARCHAR(128)"},
 
         {"name": "status", "type": "VARCHAR(20)", "constraints": "NOT NULL DEFAULT 'uc'"},
         {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"}

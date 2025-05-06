@@ -237,7 +237,7 @@ def notifications():
 @patient_bp.route('/medical_records', methods=['POST', 'GET'])
 @login_required
 def medical_records():
-    records=None
+    records = None
     # records = get_medical_records(current_user.id)
 
     if request.method == 'POST':

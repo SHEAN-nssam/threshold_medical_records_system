@@ -342,7 +342,15 @@ def medical_record(request_id):
             # 提交病历
             if update_medical_record_by_request(request_id, patient_complaint, medical_history, physical_examination,
                                                 auxiliary_examination, diagnosis, treatment_advice):
-                if submit_medical_record_by_request(request_id):
+                to_cal = f"{request_id}-{patient_complaint}-{medical_history}-{physical_examination}-" \
+                         f"{auxiliary_examination}-{diagnosis}-{treatment_advice}"
+
+                to_sign = generate_sm3_hash(to_cal)
+                dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+                dc_akey = dc_akey.decode()
+                dc_sign = sm2_sign(to_sign, dc_akey)
+                del dc_akey
+                if submit_medical_record_by_request(request_id, dc_sign):
                     message = 'Medical record submitted successfully.'
                 else:
                     message = 'Failed to submit medical record.'
