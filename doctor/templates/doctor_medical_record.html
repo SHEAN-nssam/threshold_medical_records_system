@@ -62,11 +62,11 @@
                     <label for="treatment_advice">Treatment Advice:</label>
                     <textarea id="treatment_advice" name="treatment_advice">{{ medical_record.treatment_advice if medical_record }}</textarea><br><br>
 
-                    <button type="submit" name="action" value="save">Save Draft</button>
-                    <button type="submit" name="action" value="submit">Submit for Review</button>
+                    <button type="submit" name="action" value="save">保存草稿</button>
+                    <button type="submit" name="action" value="submit">提交审核</button>
                 </form>
 
-                <p><a href="{{ url_for('doctor_bp.request_list') }}">Back to Appointments</a></p>
+                <p><a href="{{ url_for('doctor_bp.request_list') }}">返回问诊列表</a></p>
             </div>
         </div>
 

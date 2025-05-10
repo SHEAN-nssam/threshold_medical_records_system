@@ -1,45 +1,6 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-<div class="container">
-        <header>
-            <h1>医疗系统</h1>
-            <p>连接医疗专业人员并管理您的健康记录</p>
-        </header>
-
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
-
-                    <div class="function-buttons">
-                        <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
-                            <h3>个人信息</h3>
-                            <p>管理您的个人信息</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.consultation') }}" class="function-button green">
-                            <h3>问诊服务</h3>
-                            <p>预约和管理您的问诊</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.notifications') }}" class="function-button orange">
-                            <h3>通知消息</h3>
-                            <p>查看系统通知</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.medical_records') }}" class="function-button purple">
-                            <h3>病历记录</h3>
-                            <p>查看您的病历记录</p>
-                        </a>
-                    </div>
-                </div>
-
-
-            <div class="main-content">
-                <div class="content-area">
+{% extends "patient_dashboard.html" %}
+{% block title %}消息通知{% endblock %}
+{% block content %}
                     <!-- 这里可以放置具体页面的内容 -->
                     <h2>Notifications</h2>
     <div id="notifications">
@@ -48,61 +9,16 @@
                 {% for notification in notifications %}
                     <li>
                         {{ notification.message }}
-                        <p>Time: {{ notification.time }}</p>
-                        <p>Consultation Request ID: {{ notification.consultation_request_id }}</p>
+                        <p>时间: {{ notification.time }}</p>
+                        <p>问诊申请号: {{ notification.consultation_request_id }}</p>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No notifications.</p>
+            <p>无通知</p>
         {% endif %}
     </div>
-                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">Back to Home</a></p>
-                </div>
-            </div>
-        </div>
+                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">返回主页</a></p>
 
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
-    </div>
+{% endblock %}
 
-    <script>
-        function logout() {
-            // 处理退出登录的逻辑
-            window.location.href = "{{ url_for('patient_bp.logout') }}";
-        }
-    </script>
-</body>
-</html>
-
-
-<!--
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Notifications</title>
-</head>
-<body>
-
-    <h2>Notifications</h2>
-    <div id="notifications">
-        {% if notifications %}
-            <ul>
-                {% for notification in notifications %}
-                    <li>
-                        {{ notification.message }}
-                        <p>Time: {{ notification.time }}</p>
-                        <p>Consultation Request ID: {{ notification.consultation_request_id }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No notifications.</p>
-        {% endif %}
-    </div>
-
-    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
-</body>
-</html>
--->

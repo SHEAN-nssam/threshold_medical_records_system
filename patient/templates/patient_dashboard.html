@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
+    <title>{% block title %}患者主页{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
@@ -39,17 +39,20 @@
 
 
             <div class="main-content">
-                <h2>欢迎，问诊者 {{ username }}!</h2>
-                <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
 
-                {% if not profile_completed %}
+                <div class="content-area">
+
+                    {% block content %}
+                    <!-- 这里可以放置具体页面的内容 -->
+                    <h2>欢迎，问诊者 {{ username }}!</h2>
+                    <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
+                    {% if not profile_completed %}
                     <div class="notification">
                         <p>您的个人信息尚未完成。请完成个人信息以启用问诊服务。</p>
                     </div>
                 {% endif %}
-                <div class="content-area">
-                    <!-- 这里可以放置具体页面的内容 -->
                     <p>这是主页内容区域。</p>
+                    {% endblock %}
                 </div>
             </div>
         </div>

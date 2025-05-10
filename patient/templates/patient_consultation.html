@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
+    <title>患者问诊</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
@@ -42,30 +42,29 @@
             <div class="main-content">
                 <div class="content-area">
                     <!-- 这里可以放置具体页面的内容 -->
-                    <h2>Consultation</h2>
+
+                    <h2>问诊</h2>
                     {% if message %}
                     <p style="color: green;">{{ message }}</p>
                     {% endif %}
-                    <h3>Online Doctors</h3>
+                    <h3>在线的医生</h3>
                     {% if online_doctors %}
                     <ul>
                         {% for doctor in online_doctors %}
                             <li>
                                 {{ doctor.department }} - {{ doctor.full_name }} - {{ doctor.title }}
                                 <form method="POST" action="{{ url_for('patient_bp.send_request', doctor_id=doctor.id) }}">
-                                    <button type="button" id="openModal" class="send-request-btn" data-doctor-id="{{ doctor.id }}">Send Request</button> <!--打开弹窗的按钮-->
+                                    <button type="button" id="openModal" class="send-request-btn" data-doctor-id="{{ doctor.id }}">发送申请</button> <!--打开弹窗的按钮-->
                                 </form>
                             </li>
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p>No online doctors available.</p>
+                    <p>没有在线的医生</p>
                 {% endif %}
-                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">Back to Home</a></p>
-                </div>
-            </div>
+                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">返回主页</a></p>
 
-            <!-- 弹窗部分代码-->
+                     <!-- 弹窗部分代码-->
         <div id="myModal" class="modal"> <!-- modal元素使用-->
             <div class="modal-content">
                 <span class="close">&times;</span> <!-- closeBtn元素使用 -->
@@ -76,6 +75,9 @@
             </div>
         </div>
 
+
+                </div>
+            </div>
         </div>
 
         <footer>

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Login</title>
+    <title>医生登录</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h2>Doctor Login</h2>
+            <h2>医生登录</h2>
         </header>
         <main>
             <div class="card doctor-card">
@@ -18,15 +18,15 @@
         {% if message %}
         <p style="color: red;">{{ message }}</p>
     {% endif %}
-        <label for="username">Username:</label>
+        <label for="username">用户名：</label>
         <input type="text" id="username" name="username" required><br><br>
 
-        <label for="password">Password:</label>
+        <label for="password">密码：</label>
         <input type="password" id="password" name="password" required><br><br>
 
-        <button type="submit">Login</button>
+        <button type="submit">登录</button>
     </form>
-    <p style="margin-top: 20px;">Don't have an account? <a href="/doctor/register">Register</a></p>
+    <p style="margin-top: 20px;">没有账号？<a href="/doctor/register">注册</a></p>
             </div>
         </main>
     </div>

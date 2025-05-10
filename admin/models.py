@@ -57,6 +57,58 @@ def create_admin_login(user_id, username, password_hash, salt, akey, bkey):
             connection.close()
 
 
+def update_admin_login_username(ad_id, username):
+    connection = None
+    cursor = None
+    try:
+        # 连接数据库
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        # 插入患者登录信息
+        cursor.execute("UPDATE admins SET username = %s WHERE id = %s",
+                       (username, ad_id))
+        # 提交事务
+        connection.commit()
+        return True
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        # 打印错误信息
+        print(f"models_update_admin_login_username_Error: {e}")
+        return False
+    finally:
+        # 关闭数据库连接
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+def update_admin_login_password(ad_id, password, a_key, b_key, adksh):
+    connection = None
+    cursor = None
+    try:
+        # 连接数据库
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        # 插入患者登录信息
+        cursor.execute("UPDATE admins SET password = %s, a_key=%s, b_key=%s, adksh=%s WHERE id = %s",
+                       (password, a_key, b_key, adksh, ad_id))
+        # 提交事务
+        connection.commit()
+        return True
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        # 打印错误信息
+        print(f"models_update_admin_login_password_Error: {e}")
+        return False
+    finally:
+        # 关闭数据库连接
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
 def get_admin_akey(admin_id, password):
     connection = None
     cursor = None
@@ -828,6 +880,32 @@ def get_doctor_key(doc_id):
             cursor.close()
             connection.close()
     return dkey
+
+
+# 创建医生登录信息
+def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
+    connection = None; cursor = None
+    try:
+        # 连接数据库
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        # 插入患者登录信息
+        cursor.execute("INSERT INTO doctors (id, username, password, sa, a_key, b_key) VALUES (%s, %s, %s, %s, %s, %s)",
+                       (user_id, username, password_hash, salt, akey, bkey))
+        # 提交事务
+        connection.commit()
+        return True
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        # 打印错误信息
+        print(f"models_create_doctor_login_Error: {e}")
+        return False
+    finally:
+        # 关闭数据库连接
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+# from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 import json
 import tempfile
@@ -27,7 +27,7 @@ def login():
             results = get_admin_login(username)
             #print(results['id'], results['username'], results['password'])
             if results is None:
-                message = 'Username not found. Please register first.'
+                message = '用户名不存在，请重试'
             else:
                 # stored_password = results['password'].decode('utf-8')
                 stored_password = results['password']
@@ -43,10 +43,10 @@ def login():
 
                     return redirect(url_for('admin_bp.ad_home'))
                 else:
-                    message = 'Invalid password. Please try again.'
+                    message = '密码错误，请重试'
         except Error as e:
             print(f"routes_admin_login_Error: {e}")
-            message = 'Login failed. Please try again.'
+            message = '登录失败，请重试'
 
     return render_template('admin_login.html', message=message)
 
@@ -69,29 +69,68 @@ def register():
             results = get_admin_login(username)
             # print(results['id'], results['username'], results['password'])
             if results is not None:
-                message = 'Username already exists. Please choose a different one.'
+                message = '用户名存在，请重试'
                 return render_template('admin_register.html', message=message)
-            '''
-            sa = generate_salt()
-            hashed_password = generate_salt_sm3(password, sa)
-            akey, bkey = generate_sm2_key_pair()
-            tkey = generate_pbkdf2_key(password, sa)
-            akey = sm4_encrypt(akey, tkey)
-            del tkey
-            '''
+
             if create_admin_login(generate_admin_id(), username, hashed_password, sa, akey, bkey):
-                message = 'Registration successful! Please login.'
+                message = '注册成功，请登录'
                 return render_template('admin_register.html', message=message)
             else:
-                message = 'Registration failed.'
+                message = '注册失败'
                 return render_template('admin_register.html', message=message)
         except Error as e:
             print(f"routes_admin_login_Error: {e}")
-            message = 'Registration failed. Please try again.'
+            message = '注册失败，请重试'
 
     return render_template('admin_register.html', message=message)
 
+
 # 增加修改个人用户名和密码的功能
+@admin_bp.route('/login_info_change', methods=['GET', 'POST'])
+@login_required
+def login_info_change():
+    message = None
+    results = get_admin_login(current_user.username)
+    if request.method == 'POST':
+        old_password = request.form['old_password']
+        stored_password = results['password']
+        sa = results['sa']
+        if check_salt_sm3(old_password, sa, stored_password):
+            pass
+        else:
+            return render_template("admin_login_info_change.html", message="原密码输入错误")
+        new_password = request.form['new_password']
+        new_username = request.form['new_username']
+        if new_password is not None:
+            # 先解密旧有分片
+            # 解密原密钥
+            ad_akey = get_admin_akey(current_user.id, old_password)  # bytes
+            ad_akey = ad_akey.decode()
+            # 解密原分片
+            my_share = get_admin_login(current_user.username)['adksh']  # 获取个人分片
+            my_share = sm2_decrypt(my_share, ad_akey)
+            # 生成新哈希值及新密钥
+            hashed_password = generate_salt_sm3(new_password, sa)
+            akey, bkey = generate_sm2_key_pair()
+            # 重新加密分片
+            en_share = sm2_encrypt(my_share, akey)
+            # 迭代对称密钥加密私钥
+            tkey = generate_pbkdf2_key(new_password, sa)
+            akey = sm4_encrypt(akey, tkey)
+            del tkey
+            if update_admin_login_password(current_user.id, hashed_password, akey, bkey, en_share):
+                message = "密码已更新"
+        if new_username is not None:
+            if update_admin_login_username(current_user.id, new_username):
+                message = "用户名已更新"
+
+    return render_template("admin_login_info_change.html", message=message)
+
+
+# 管理员的用户管理功能
+# 包括管理员用户新加入时自动重新生成共同密钥对
+# 导入医生用户的权限
+
 
 def generate_admin_id():
     connection = None
@@ -257,9 +296,9 @@ def pass_proposal(proposal_id):
     success = pass_retrieve_proposal(proposal_id, admin_id, en_share)
 
     if success:
-        message="提议已同意"
+        message = "提议已同意"
     else:
-        message="同意提议失败"
+        message = "同意提议失败"
     return render_template('admin_review_proposals.html', message=message)
 
 
@@ -370,12 +409,11 @@ def perform_action(proposal_id):
         record["doctor_signature"] = record["doctor_signature"].decode()
     del mr_ad_akey
 
-    to_cal = f"{record['consultation_request_id']}-{record['patient_complaint']}-{record['medical_history']}-" \
-             f"{record['physical_examination']}-{record['auxiliary_examination']}-{record['diagnosis']}-{record['treatment_advice']}"
-
     # 创建用于存储病历的字典列表
     medical_records_list = []
     for record in pt_records:
+        to_cal = f"{record['consultation_request_id']}-{record['patient_complaint']}-{record['medical_history']}-" \
+                 f"{record['physical_examination']}-{record['auxiliary_examination']}-{record['diagnosis']}-{record['treatment_advice']}"
         # 将记录转换为字典
         record_dict = {
             "medical_record_id": record["id"],
@@ -417,11 +455,12 @@ def perform_action(proposal_id):
                 json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
         # 发送文件给用户
         return send_file(json_file_path, as_attachment=True,download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
-        os.unlink(json_file_path)
+        # os.unlink(json_file_path)
     else:
         # 渲染页面
         return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
     # return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
+
 
 
 # 注销功能

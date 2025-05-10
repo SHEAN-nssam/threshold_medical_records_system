@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Personal Information</title>
+    <title>编辑个人信息</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
@@ -24,16 +24,16 @@
 </div>
 
 <div class="main-content">
-    <h2>Edit Personal Information</h2>
+    <h2>编辑个人信息</h2>
     <div class="content-area">
         <form method="POST">
-        <label for="full_name">Full Name:</label>
+        <label for="full_name">姓名：</label>
         <input type="text" id="full_name" name="full_name" required value="{{ profile_data.full_name if profile_data else '' }}"><br><br>
 
-        <label for="gender">Gender:</label>
+        <label for="gender">性别</label>
         <select id="gender" name="gender" required>
-            <option value="male">{% if profile_data.gender == 'male'%}selected{% endif %}Male</option>
-            <option value="female">{% if profile_data.gender == 'female'%}selected{% endif %}Female</option>
+            <option value="male">{% if profile_data.gender == 'male'%}selected{% endif %}男</option>
+            <option value="female">{% if profile_data.gender == 'female'%}selected{% endif %}女</option>
         </select><br><br>
 
         <label for="birth_date">Birth Date:</label>
@@ -57,10 +57,10 @@
             <option value="Chief Physician" >{% if profile_data.title == 'Chief Physician' %}selected{% endif %}Chief Physician</option>
         </select><br><br>
 
-        <button type="submit">Save Changes</button>
+        <button type="submit">保存修改</button>
     </form>
 
-    <p><a href="{{ url_for('doctor_bp.display_profile') }}" class="btn">Back to Personal Information</a></p>
+    <p><a href="{{ url_for('doctor_bp.display_profile') }}" class="btn">返回个人信息页</a></p>
     </div>
 </div>
     </div>

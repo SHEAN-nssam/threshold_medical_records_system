@@ -51,7 +51,7 @@ def get_doctor_login_id(user_id):
             connection.close()
 
 
-# 创建登录信息
+# 创建医生登录信息
 def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
     connection = None; cursor = None
     try:
@@ -502,7 +502,8 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
             connection.close()
     return success
 
-def submit_medical_record(record_id):
+
+def submit_medical_record(record_id, doctor_signature):
     """
     提交病历，自动生成医生签名并更新病历状态为 'wr'（待审核）。
     :param record_id: 病历记录ID
@@ -525,7 +526,7 @@ def submit_medical_record(record_id):
         doctor_id = medical_record['doctor_id']
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # 签名格式错误，待更改
-        doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
+        # doctor_signature = f"{doctor_id}-{doctor_id}-{current_time}"
 
         # 更新病历状态和签名
         cursor.execute(

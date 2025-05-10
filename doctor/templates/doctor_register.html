@@ -15,15 +15,15 @@
         <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
     {% endif %}
     <form method="POST" action="/doctor/register">
-        <label for="username">Username:</label>
+        <label for="username">用户名：</label>
         <input type="text" id="username" name="username" required><br><br>
 
-        <label for="password">Password:</label>
+        <label for="password">密码：</label>
         <input type="password" id="password" name="password" required><br><br>
 
-        <button type="submit">Register</button>
+        <button type="submit">注册</button>
     </form>
-    <p style="margin-top: 20px;">Already have an account? <a href="/doctor/login">Login</a></p>
+    <p style="margin-top: 20px;">已有账号<a href="/doctor/login">登录</a></p>
         </div>
     </main>
 </div>

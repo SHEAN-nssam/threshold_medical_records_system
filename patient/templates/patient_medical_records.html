@@ -1,43 +1,7 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-<div class="container">
-        <header>
-            <h1>医疗系统</h1>
-            <p>连接医疗专业人员并管理您的健康记录</p>
-        </header>
+{% extends "patient_dashboard.html" %}
+{% block title %}既往病历查询{% endblock %}
 
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
-                    <div class="function-buttons">
-                        <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
-                            <h3>个人信息</h3>
-                            <p>管理您的个人信息</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.consultation') }}" class="function-button green">
-                            <h3>问诊服务</h3>
-                            <p>预约和管理您的问诊</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.notifications') }}" class="function-button orange">
-                            <h3>通知消息</h3>
-                            <p>查看系统通知</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.medical_records') }}" class="function-button purple">
-                            <h3>病历记录</h3>
-                            <p>查看您的病历记录</p>
-                        </a>
-                    </div>
-            </div>
-
-            <div class="main-content">
-                <div class="content-area">
+{% block content %}
                     <h2>既往病历查询</h2>
                     <!-- 这里可以放置具体页面的内容 -->
                     <!-- 在此处插入与获取用户密码相关的功能 -->
@@ -84,25 +48,8 @@
                         <p><a href="{{ url_for('patient_bp.pt_home') }}" class = "btn">Back to Home</a></p>
     </div>
 
-                </div>
-            </div>
-        </div>
+{% endblock %}
 
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
-    </div>
-
-    <script>
-        function logout() {
-            // 处理退出登录的逻辑
-            window.location.href = "{{ url_for('patient_bp.logout') }}";
-        }
-
-
-    </script>
-</body>
-</html>
 
 <!--
 <!DOCTYPE html>

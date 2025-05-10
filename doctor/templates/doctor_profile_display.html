@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Information</title>
+    <title>医生个人信息</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
@@ -29,16 +29,16 @@
         <p>Please complete your personal information as soon as possible.</p>
         <a href="{{ url_for('doctor_bp.edit_profile') }}">Complete Personal Information</a>
     {% else %}
-        <p>Full Name: {{ profile_data.full_name }}</p>
-        <p>Gender: {{ profile_data.gender }}</p>
-        <p>Birth Date: {{ profile_data.birth_date }}</p>
-        <p>Age: {{age }}</p>
-        <p>Department: {{ profile_data.department }}</p>
-        <p>Title: {{ profile_data.title }}</p>
-        <a href="{{ url_for('doctor_bp.edit_profile') }}">Edit Personal Information</a>
+        <p>姓名：{{ profile_data.full_name }}</p>
+        <p>性别：{{ profile_data.gender }}</p>
+        <p>出生日期：{{ profile_data.birth_date }}</p>
+        <p>年龄：{{age }}</p>
+        <p>科室：{{ profile_data.department }}</p>
+        <p>职称{{ profile_data.title }}</p>
+        <a href="{{ url_for('doctor_bp.edit_profile') }}">编辑个人信息</a>
     {% endif %}
 
-    <p><a href="{{ url_for('doctor_bp.dc_home') }}">Back to Home</a></p>
+    <p><a href="{{ url_for('doctor_bp.dc_home') }}">返回主页</a></p>
 </div>
 
 </div>

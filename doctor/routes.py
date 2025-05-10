@@ -1,7 +1,7 @@
 # doctor\routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+# from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
 from config import db_config, User, calcu_age  # 假设 User 类在 app.py 中定义
@@ -25,7 +25,7 @@ def login():
             results = get_doctor_login(username)
             # print(results['id'], results['username'], results['password'])
             if results is None:
-                message = 'Username not found. Please register first.'
+                message = '用户名不存在，请先注册'
             else:
                 stored_password = results['password']
                 sa = results['sa']
@@ -46,10 +46,10 @@ def login():
                         raise Error(f"医生{results['username']}登录但未能正常设置其在线状态")
                     # return redirect(url_for('doctor_bp.dc_home'))
                 else:
-                    message = 'Invalid password. Please try again.'
+                    message = '密码错误，请重试'
         except Error as e:
             print(f"routes_doctor_login_Error: {e}")
-            message = 'Login failed. Please try again.'
+            message = '登录失败，请重试'
             # return redirect(url_for('patient_bp.login'))
 
     return render_template('doctor_login.html', message=message)
@@ -76,18 +76,18 @@ def register():
             results = get_doctor_login(username)
             # print(results['id'], results['username'], results['password'])
             if results is not None:
-                message = 'Username already exists. Please choose a different one.'
+                message = '用户名已存在，请重试'
                 return render_template('doctor_register.html', message=message)
 
             if create_doctor_login(generate_doctor_id(), username, hashed_password, sa, akey, bkey):
-                message = 'Registration successful! Please login.'
+                message = '注册成功，请登录'
                 return render_template('doctor_register.html', message=message)
             else:
-                message = 'Registration failed.'
+                message = '注册失败'
                 return render_template('doctor_register.html', message=message)
         except Error as e:
             print(f"routes_doctor_login_Error: {e}")
-            message = 'Registration failed. Please try again.'
+            message = '注册失败请重试'
 
     return render_template('doctor_register.html', message=message)
 
@@ -166,21 +166,12 @@ def edit_profile():
         title = request.form['title']
 
         if create_doctor_profile(current_user.id, full_name, gender, birth_date, department, title):
-            message = 'Profile updated successfully.'
+            message = '个人信息已更新'
             profile_data = get_doctor_profile(current_user.id)
         else:
-            message = 'Failed to save profile. Please try again.'
+            message = '个人信息未能更新'
 
     return render_template('doctor_profile_edit.html', message=message, profile_data=profile_data)
-
-
-'''
-# 医生接诊
-@doctor_bp.route('/appointments')
-@login_required
-def appointments():
-    return render_template('doctor_appointments.html')
-'''
 
 
 # 医生查看问诊申请
@@ -236,7 +227,7 @@ def respond_request(request_id, action):
 
     message = None
     if update_consultation_request(request_id, status):
-        message = 'Request updated successfully.'
+        message = '问诊申请已接受'
         # 发送通知给患者
         patient_id = get_patient_id(request_id)
         add_notification(patient_id, request_id, status)
@@ -245,18 +236,8 @@ def respond_request(request_id, action):
         socketio.emit('request_response', {'request_id': request_id, 'status': status},
                       room=f'patient_{get_patient_id(request_id)}')
     else:
-        message = 'Failed to update request.'
-    '''
-    password = session.get('pw')
-    dc_akey = get_doctor_akey(current_user.id, password)  # bytes
-    dc_akey = dc_akey.decode()
-    # 获取加密的患者ID并解密
-    encrypted_patient_id = get_patient_id(request_id)  # 假设此函数返回加密的患者ID
-    patient_id_bytes = sm2_decrypt(encrypted_patient_id, dc_akey)
-    patient_id = int(patient_id_bytes.decode('utf-8'))
-    del dc_akey
-    request['patient_id'] = patient_id
-    '''
+        message = '医生端问诊申请接受失败'
+
     requests = get_consultation_requests(current_user.id)
     return render_template('doctor_appointments.html', requests=requests, message=message)
 
@@ -311,9 +292,9 @@ def medical_record(request_id):
                 patient_id = c_request['patient_id']
         if create_medical_record(request_id, patient_id):
             medical_record_data = get_medical_records_by_request(request_id)
-            message = 'New medical record created.'
+            message = '病历已创建'
         else:
-            message = 'Failed to create medical record.'
+            message = '病历创建失败'
     else:
         print(medical_record_data)
         # medical_record_data['patient_id'] = int(sm2_decrypt(medical_record_data['patient_id'], dc_akey).decode('utf-8'))
@@ -334,9 +315,9 @@ def medical_record(request_id):
             # 保存草稿
             if update_medical_record_by_request(request_id, patient_complaint, medical_history, physical_examination,
                                                 auxiliary_examination, diagnosis, treatment_advice):
-                message = 'Draft saved successfully.'
+                message = '病历已保存'
             else:
-                message = 'Failed to save draft.'
+                message = '病历保存失败'
             # 加密病历已经写好的部分（以未提交状态加密）
         elif action == 'submit':
             # 提交病历
@@ -351,15 +332,15 @@ def medical_record(request_id):
                 dc_sign = sm2_sign(to_sign, dc_akey)
                 del dc_akey
                 if submit_medical_record_by_request(request_id, dc_sign):
-                    message = 'Medical record submitted successfully.'
+                    message = '病历已提交'
                 else:
-                    message = 'Failed to submit medical record.'
+                    message = '病历提交失败'
             else:
-                message = 'Failed to save draft before submission.'
+                message = '病历提交前未能保存，提交失败'
             if end_consultation(request_id):
-                message = message + "  "+"Consultation ended successfully."
+                message = message + "  "+"问诊已完成"
             else:
-                message = message + "  "+"Failed to end consultation."
+                message = message + "  "+"问诊关系未能正常结束"
             # 以提交状态加密
 
     return render_template('doctor_medical_record.html', requests=requests,
@@ -412,19 +393,28 @@ def revise_medical_record(mr_id, review_record_id):
             # 保存草稿
             if update_medical_record(mr_id, patient_complaint, medical_history, physical_examination,
                                      auxiliary_examination, diagnosis, treatment_advice):
-                message = 'Draft saved successfully.'
+                message = '草稿已保存'
             else:
-                message = 'Failed to save draft.'
+                message = '草稿保存失败'
         elif action == 'submit':
             # 提交病历
             if update_medical_record(mr_id, patient_complaint, medical_history, physical_examination,
                                      auxiliary_examination, diagnosis, treatment_advice):
-                if submit_medical_record(mr_id):
-                    message = 'Medical record submitted successfully.'
+                to_cal = f"{medical_record_data['request_id']}-{patient_complaint}-{medical_history}-{physical_examination}-" \
+                         f"{auxiliary_examination}-{diagnosis}-{treatment_advice}"
+
+                to_sign = generate_sm3_hash(to_cal)
+                password = session.get('pw')
+                dc_akey = get_doctor_akey(current_user.id, password)  # bytes
+                dc_akey = dc_akey.decode()
+                dc_sign = sm2_sign(to_sign, dc_akey)
+                del dc_akey
+                if submit_medical_record(mr_id, dc_sign):
+                    message = '病历已提交'
                 else:
-                    message = 'Failed to submit medical record.'
+                    message = '病历提交失败'
             else:
-                message = 'Failed to save draft before submission.'
+                message = '提交前病历未能保存'
     return render_template("doctor_revise_medical_record.html", rejected_records=rejected_records, message=message, review_record=review_record_data, medical_record=medical_record_data)
 
 
@@ -436,14 +426,3 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-'''
-if __name__ == '__main__':
-    user = User(20000001, '李四', 'patient')
-    login_user(user)
-
-    # 将医生的登录信息存储到 session 中
-    session['doctor_id'] = 20000001
-    session['doctor_username'] = '李四'
-    session['pw'] = '789456'
-    view_appointments()
-'''

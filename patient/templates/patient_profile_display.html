@@ -1,102 +1,22 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-<div class="container">
-        <header>
-            <h1>医疗系统</h1>
-            <p>连接医疗专业人员并管理您的健康记录</p>
-        </header>
+{% extends "patient_dashboard.html" %}
+{% block title %}查看个人信息{% endblock %}
 
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
+{% block content %}
 
-                    <div class="function-buttons">
-                        <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
-                            <h3>个人信息</h3>
-                            <p>管理您的个人信息</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.consultation') }}" class="function-button green">
-                            <h3>问诊服务</h3>
-                            <p>预约和管理您的问诊</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.notifications') }}" class="function-button orange">
-                            <h3>通知消息</h3>
-                            <p>查看系统通知</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.medical_records') }}" class="function-button purple">
-                            <h3>病历记录</h3>
-                            <p>查看您的病历记录</p>
-                        </a>
-                    </div>
-                </div>
-
-
-            <div class="main-content">
-                <div class="content-area">
                     <!-- 这里可以放置具体页面的内容 -->
                     <h2>个人信息</h2>
                     {% if not profile_complete %}
-                    <p>Please complete your personal information as soon as possible.</p>
+                    <p>请尽快完善个人信息</p>
 
                     {% else %}
-                    <p>Full Name: {{ profile_data.full_name }}</p>
-                    <p>Gender: {{ profile_data.gender }}</p>
-                    <p>Birth Date: {{ profile_data.birth_date }}</p>
-                    <p>Age: {{age }}</p>
+                    <p>姓名：{{ profile_data.full_name }}</p>
+                    <p>性别：{{ profile_data.gender }}</p>
+                    <p>出生日期：{{ profile_data.birth_date }}</p>
+                    <p>年龄：{{age }}</p>
 
                     {% endif %}
-                    <p><a href="{{ url_for('patient_bp.edit_profile') }}" class="btn">Edit Personal Information</a></p>
-                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">Back to Home</a></p>
+                    <p><a href="{{ url_for('patient_bp.edit_profile') }}" class="btn">编辑个人信息</a></p>
+                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class="btn">返回主页</a></p>
 
-                </div>
-            </div>
-        </div>
+{% endblock %}
 
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
-    </div>
-
-    <script>
-        function logout() {
-            // 处理退出登录的逻辑
-            window.location.href = "{{ url_for('patient_bp.logout') }}";
-        }
-    </script>
-</body>
-</html>
-
-
-
-
-<!-- patient_profile_display.html -->
-<!--<!DOCTYPE html>
-<html>
-<head>
-    <title>Personal Information</title>
-</head>
-<body>
-    <h2>Personal Information</h2>
-
-    {% if not profile_complete %}
-        <p>Please complete your personal information as soon as possible.</p>
-        <a href="{{ url_for('patient_bp.edit_profile') }}">Complete Personal Information</a>
-    {% else %}
-        <p>Full Name: {{ profile_data.full_name }}</p>
-        <p>Gender: {{ profile_data.gender }}</p>
-        <p>Birth Date: {{ profile_data.birth_date }}</p>
-        <p>Age: {{age }}</p>
-        <a href="{{ url_for('patient_bp.edit_profile') }}">Edit Personal Information</a>
-    {% endif %}
-
-    <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
-</body>
-</html>
--->

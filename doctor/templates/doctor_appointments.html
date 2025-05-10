@@ -42,24 +42,24 @@
                      <ul>
                          {% for request in requests %}
                          <li>
-                             Request ID: {{ request.formatted_id }}
-                             Patient ID: {{ request.patient_id }}
-                             <p>Status: {{ request.status }}</p>
+                             问诊申请号: {{ request.formatted_id }}
+                             患者号: {{ request.patient_id }}
+                             <p>状态: {{ request.status }}</p>
                              {% if request.status == 'pending' %}
                              <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='accept') }}">
-                                 <button type="submit">Accept</button>
+                                 <button type="submit">接受</button>
                              </form>
                              <form method="POST" action="{{ url_for('doctor_bp.respond_request', request_id=request.id, action='reject') }}">
-                                 <button type="submit">Reject</button>
+                                 <button type="submit">拒绝</button>
                              </form>
                              {% endif %}
                          </li>
                          {% endfor %}
                      </ul>
                      {% else %}
-                     <p>No pending requests.</p>
+                     <p>没有待处理的申请</p>
                      {% endif %}
-                     <p><a href="{{ url_for('doctor_bp.dc_home') }}" class="btn">Back to Home</a></p>
+                     <p><a href="{{ url_for('doctor_bp.dc_home') }}" class="btn">返回主页</a></p>
                  </div>
              </div>
          </div>

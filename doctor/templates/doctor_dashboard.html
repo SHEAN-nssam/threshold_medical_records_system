@@ -27,12 +27,14 @@
     <h2>登录状态： {{ username }} (ID: {{ user_id }})</h2>
      <div class="notification">
         {% if not profile_completed %}
-            <p style="color: orange;">Your personal information is pending completion. Please complete it to enable appointment services.</p>
+            <p style="color: orange;">请尽快完善个人信息，以启用预约功能</p>
         {% endif %}
     </div>
              <div class="content-area">
                     <!-- 这里可以放置具体页面的内容 -->
+                 {% block content %}
                     <p>这是主页内容区域。</p>
+                 {% endblock %}
                 </div>
         </div>
 

@@ -9,7 +9,7 @@
 <body>
 <div class="container">
     <header>
-    <h2>Admin Login</h2>
+    <h2>管理员登录</h2>
     </header>
     <main>
     <div class="card admin-card">
@@ -17,15 +17,15 @@
         {% if message %}
             <p style="color: red;">{{ message }}</p>
         {% endif %}
-        <label for="username">Username:</label>
+        <label for="username">用户名：</label>
         <input type="text" id="username" name="username" required><br><br>
 
-        <label for="password">Password:</label>
+        <label for="password">密码：</label>
         <input type="password" id="password" name="password" required><br><br>
 
-        <button type="submit">Login</button>
+        <button type="submit">登录</button>
     </form>
-    <p style="margin-top: 20px;">Don't have an account? <a href="/admin/register">Register</a></p>
+    <p style="margin-top: 20px;">没有账号？<a href="/admin/register">注册</a></p>
         </div>
     </main>
 </div>

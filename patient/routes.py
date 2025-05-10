@@ -25,7 +25,7 @@ def login():
             results = get_patient_login(username)
             #print(results['id'], results['username'], results['password'])
             if results is None:
-                message = 'Username not found. Please register first.'
+                message = '用户名不存在，请重试'
             else:
                 #stored_password = results['password'].decode('utf-8')
                 stored_password = results['password']
@@ -36,10 +36,10 @@ def login():
                     login_user(user)
                     return redirect(url_for('patient_bp.pt_home'))
                 else:
-                    message = 'Invalid password. Please try again.'
+                    message = '密码错误，请重试'
         except Error as e:
             print(f"routes_patient_login_Error: {e}")
-            message = 'Login failed. Please try again.'
+            message = '登录失败，请重试'
             # return redirect(url_for('patient_bp.login'))
 
     return render_template('patient_login.html', message=message)
@@ -66,18 +66,18 @@ def register():
             results = get_patient_login(username)
             #print(results['id'], results['username'], results['password'])
             if results is not None:
-                message = 'Username already exists. Please choose a different one.'
+                message = '用户名已存在，请重试'
                 return render_template('patient_register.html', message=message)
             if create_patient_login(generate_patient_id(), username, hashed_password, sa, akey, bkey):
 
-                message = 'Registration successful! Please login.'
+                message = '注册成功，请登录'
                 return render_template('patient_register.html', message=message)
             else:
-                message = 'Registration failed.'
+                message = '注册成功'
                 return render_template('patient_register.html', message=message)
         except Error as e:
             print(f"routes_patient_login_Error: {e}")
-            message = 'Registration failed. Please try again.'
+            message = '注册失败，请重试'
 
     return render_template('patient_register.html', message=message)
 
@@ -151,11 +151,11 @@ def edit_profile():
         birth_date = request.form.get('birth_date')
 
         if create_patient_profile(current_user.id, full_name, gender, birth_date):
-            message = 'Profile updated successfully.'
+            message = '个人信息已更新'
             profile_data = get_patient_profile(current_user.id)
             # return redirect(url_for('patient_bp.display_profile'))
         else:
-            message = 'Failed to save profile. Please try again.'
+            message = '个人信息更新失败，请重试'
 
     return render_template('patient_profile_edit.html', message=message, profile_data=profile_data)
 
@@ -189,7 +189,7 @@ def send_request(doctor_id):
     stored_password = results['password']
     sa = results['sa']
     if not check_salt_sm3(pwd, sa, stored_password):
-        message = 'Invalid password.'
+        message = '密码错误'
         # return redirect(url_for('patient_bp.consultation'))
         return render_template('patient_consultation.html', online_doctors=online_doctors, message=message)
 
@@ -217,9 +217,9 @@ def send_request(doctor_id):
         socketio = current_app.extensions['socketio']
         socketio.emit('new_request', {'doctor_id': doctor_id}, room=f'doctor_{doctor_id}')
 
-        message = 'Request sent successfully.'
+        message = '问诊申请已发送'
     else:
-        message = 'Failed to send request.'
+        message = '问诊申请发送失败'
 
     return render_template('patient_consultation.html', online_doctors=online_doctors, message=message)
 

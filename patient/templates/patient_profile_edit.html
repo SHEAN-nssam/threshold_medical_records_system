@@ -1,111 +1,26 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者主页</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-</head>
-<body>
-<div class="container">
-        <header>
-            <h1>医疗系统</h1>
-            <p>连接医疗专业人员并管理您的健康记录</p>
-        </header>
-
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
-
-                    <div class="function-buttons">
-                        <a href="{{ url_for('patient_bp.display_profile') }}" class="function-button blue">
-                            <h3>个人信息</h3>
-                            <p>管理您的个人信息</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.consultation') }}" class="function-button green">
-                            <h3>问诊服务</h3>
-                            <p>预约和管理您的问诊</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.notifications') }}" class="function-button orange">
-                            <h3>通知消息</h3>
-                            <p>查看系统通知</p>
-                        </a>
-                        <a href="{{ url_for('patient_bp.medical_records') }}" class="function-button purple">
-                            <h3>病历记录</h3>
-                            <p>查看您的病历记录</p>
-                        </a>
-                    </div>
-                </div>
+{% extends "patient_dashboard.html" %}
+{% block title %}查看个人信息{% endblock %}
 
 
-            <div class="main-content">
-
-
-                <div class="content-area">
+{% block content %}
                     <!-- 这里可以放置具体页面的内容 -->
                     <h2>个人信息编辑</h2>
                     <form method="POST">
-                    <label for="full_name">Full Name:</label>
+                    <label for="full_name">姓名：</label>
                     <input type="text" id="full_name" name="full_name" required value="{{ profile_data.full_name if profile_data else '' }}"><br><br>
 
-                    <label for="gender">Gender:</label>
+                    <label for="gender">性别：</label>
                     <select id="gender" name="gender" required>
                         <option value="male">{% if profile_data.gender == 'male'%}selected{% endif %}Male</option>
-                        <option value="female">{% if profile_data.gender == 'female'%}selected{% endif %}Female</option>
+                        <option value="female">{% if profile_data.gender == 'female'%}selected {% endif %}Female</option>
                     </select><br><br>
-                    <label for="birth_date">Birth Date:</label>
+                    <label for="birth_date">出生日期：</label>
                     <input type="date" id="birth_date" name="birth_date" required value="{{ profile_data.birth_date.strftime('%Y-%m-%d') if profile_data else '' }}"><br><br>
-                    <button type="submit">Save Changes</button>
+                    <button type="submit">提交</button>
     </form>
-                    <p><a href="{{ url_for('patient_bp.display_profile') }}" class="btn">Back to Personal Information</a></p>
-                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class = "btn">Back to Home</a></p>
+                    <p><a href="{{ url_for('patient_bp.display_profile') }}" class="btn">返回个人信息页</a></p>
+                    <p><a href="{{ url_for('patient_bp.pt_home') }}" class = "btn">返回主页</a></p>
                 </div>
-            </div>
-        </div>
-
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
-    </div>
-
-    <script>
-        function logout() {
-            // 处理退出登录的逻辑
-            window.location.href = "{{ url_for('patient_bp.logout') }}";
-        }
-    </script>
-</body>
-</html>
+{% endblock %}
 
 
-
-<!-- patient_profile_edit.html -->
-<!--
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Personal Information</title>
-</head>
-<body>
-    <h2>Edit Personal Information</h2>
-
-    <form method="POST">
-        <label for="full_name">Full Name:</label>
-        <input type="text" id="full_name" name="full_name" required value="{{ profile_data.full_name if profile_data else '' }}"><br><br>
-
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender" required>
-            <option value="male">{% if profile_data.gender == 'male'%}selected{% endif %}Male</option>
-            <option value="female">{% if profile_data.gender == 'female'%}selected{% endif %}Female</option>
-        </select><br><br>
-
-        <label for="birth_date">Birth Date:</label>
-        <input type="date" id="birth_date" name="birth_date" required value="{{ profile_data.birth_date.strftime('%Y-%m-%d') if profile_data else '' }}"><br><br>
-
-        <button type="submit">Save Changes</button>
-    </form>
-
-    <p><a href="{{ url_for('patient_bp.display_profile') }}">Back to Personal Information</a></p>
-</body>
-</html>
--->
