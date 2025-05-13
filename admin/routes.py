@@ -1,15 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, send_file
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-# from werkzeug.security import generate_password_hash, check_password_hash
-import mysql.connector
 import json
 import tempfile
-import os
-from datetime import datetime
-from mysql.connector import Error
-from config import User  # 假设 User 类在 app.py 中定义
+
+# from werkzeug.security import generate_password_hash, check_password_hash
+import mysql.connector
+from flask import Blueprint, render_template, request, redirect, url_for, session, send_file
+from flask_login import login_user, login_required, logout_user, current_user
+
 from admin.models import *
+from config import User  # 假设 User 类在 app.py 中定义
 from crypto import *
+
 # 创建蓝prints
 admin_bp = Blueprint('admin_bp', __name__, template_folder='templates')
 
@@ -25,7 +25,7 @@ def login():
         # change
         try:
             results = get_admin_login(username)
-            #print(results['id'], results['username'], results['password'])
+            # print(results['id'], results['username'], results['password'])
             if results is None:
                 message = '用户名不存在，请重试'
             else:
@@ -192,7 +192,7 @@ def review_record(record_id):
             medical_record["consultation_request_id"] = sm4_encrypt(cr_id, mr_key)
             dc_id = str(medical_record["doctor_id"]).encode('utf-8')
             medical_record["doctor_id"] = sm4_encrypt(dc_id, mr_key)
-            vi_da=datetime_to_str(medical_record["visit_date"])
+            vi_da = datetime_to_str(medical_record["visit_date"])
             medical_record["visit_date"] = sm4_encrypt(vi_da, mr_key)
             medical_record["department"] = sm4_encrypt(medical_record["department"], mr_key)
             medical_record["patient_complaint"] = sm4_encrypt(medical_record["patient_complaint"], mr_key)
@@ -224,7 +224,7 @@ def review_record(record_id):
             ad_share = sm2_encrypt(ad_share, ad_bkey)
             print("管理员分片密文：", ad_share)
             print("medical_record:", medical_record)
-            if approve_medical_record(record_id, medical_record, sv_share)\
+            if approve_medical_record(record_id, medical_record, sv_share) \
                     and create_review_record_pass(record_id, current_user.id):
                 insert_patient_share(record_id, pt_share)
                 insert_admin_share(record_id, ad_share)
@@ -255,6 +255,8 @@ def retrieve_medical_records():
         # print(patient_id)
         admin_id = current_user.id  # 假设 current_user 是登录的管理员
 
+        # 增加功能对比processing_medical_records表中的created_at，获取某指定时间段内的病历
+
         # 调用函数创建调取提议
         success = create_retrieve_proposal(admin_id, patient_id)
 
@@ -263,6 +265,7 @@ def retrieve_medical_records():
         else:
             message = "提议创建失败"
     return render_template('admin_retrieve_medical_records.html', message=message)
+
 
 # 编写两个新的路由函数，一个用于查看自己之前提出的提议，如果提议被通过了，可以通过此页面进行后续调度
 # 一个用于查看其他人提出的提议，选择是否同意其他人的提议
@@ -393,7 +396,7 @@ def perform_action(proposal_id):
         physical_examination = sm4_decrypt(record["physical_examination"], mr_tkey)
         physical_examination = physical_examination.decode()
         print("physical_examination:", physical_examination)
-        record["physical_examination"]=physical_examination
+        record["physical_examination"] = physical_examination
         auxiliary_examination = sm4_decrypt(record["auxiliary_examination"], mr_tkey)
         auxiliary_examination = auxiliary_examination.decode()
         print("auxiliary_examination:", auxiliary_examination)
@@ -445,22 +448,39 @@ def perform_action(proposal_id):
     with open(json_file_path, 'w', encoding='utf-8') as json_file:
         json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
     '''
+    from medical_record_editor import json_to_word, json_to_pdf
     # 检查请求中是否包含下载参数
     if request.args.get('download') == 'true':
-        # 创建一个临时文件
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as temp_file:
-            json_file_path = temp_file.name
-            # 将字典列表写入临时 JSON 文件
-            with open(json_file_path, 'w', encoding='utf-8') as json_file:
-                json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
-        # 发送文件给用户
-        return send_file(json_file_path, as_attachment=True,download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
-        # os.unlink(json_file_path)
+        format = request.args.get('format', 'json')  # 默认为 json
+        if format == 'word':
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as temp_file:
+                word_file_path = temp_file.name
+                json_to_word(medical_records_list, word_file_path)
+            return send_file(word_file_path, as_attachment=True,
+                             download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.docx')
+        elif format == 'pdf':
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+                pdf_file_path = temp_file.name
+                json_to_pdf(medical_records_list, pdf_file_path)
+            return send_file(pdf_file_path, as_attachment=True,
+                             download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf')
+        elif format == 'json':
+
+            # 创建一个临时文件
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as temp_file:
+                json_file_path = temp_file.name
+                # 将字典列表写入临时 JSON 文件
+                with open(json_file_path, 'w', encoding='utf-8') as json_file:
+                    json.dump(medical_records_list, json_file, ensure_ascii=False, indent=4)
+            # 发送文件给用户
+            return send_file(json_file_path, as_attachment=True,
+                         download_name=f'medical_records_proposal_{proposal_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+        else:
+            return "不支持的文件格式", 400
     else:
         # 渲染页面
         return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
     # return render_template('admin_perform_action.html', proposal_id=proposal_id, records=pt_records)
-
 
 
 # 注销功能

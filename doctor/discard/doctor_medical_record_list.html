@@ -4,120 +4,124 @@
     <title>Manage Medical Record</title>
 </head>
 <body>
-    <h2>Medical Records for Consultation Request {{ request_id }}</h2>
+<h2>Medical Records for Consultation Request {{ request_id }}</h2>
 
-    {% if medical_records %}
-        <ul>
-            {% for record in medical_records %}
-                <li>
-                    <form method="POST">
-                        <!-- 隐藏字段，用于标识记录ID、患者ID和问诊申请ID -->
-                        <input type="hidden" name="record_id" value="{{ record.id }}">
-                        <input type="hidden" name="patient_id" value="{{ record.patient_id }}">
-                        <input type="hidden" name="request_id" value="{{ request_id }}">
-
-                        <!-- 就诊日期 -->
-                        <label for="visit_date_{{ record.id }}">Visit Date:</label>
-                        <input type="datetime-local" id="visit_date_{{ record.id }}" name="visit_date" value="{{ record.visit_date }}" required><br><br>
-
-                        <!-- 科室 -->
-                        <label for="department_{{ record.id }}">Department:</label>
-                        <input type="text" id="department_{{ record.id }}" name="department" value="{{ record.department }}" required><br><br>
-
-                        <!-- 患者主诉 -->
-                        <label for="patient_complaint_{{ record.id }}">Patient Complaint:</label>
-                        <textarea id="patient_complaint_{{ record.id }}" name="patient_complaint" required>{{ record.patient_complaint }}</textarea><br><br>
-
-                        <!-- 病史 -->
-                        <label for="medical_history_{{ record.id }}">Medical History:</label>
-                        <textarea id="medical_history_{{ record.id }}" name="medical_history">{{ record.medical_history }}</textarea><br><br>
-
-                        <!-- 体格检查 -->
-                        <label for="physical_examination_{{ record.id }}">Physical Examination:</label>
-                        <textarea id="physical_examination_{{ record.id }}" name="physical_examination">{{ record.physical_examination }}</textarea><br><br>
-
-                        <!-- 辅助检查 -->
-                        <label for="auxiliary_examination_{{ record.id }}">Auxiliary Examination:</label>
-                        <textarea id="auxiliary_examination_{{ record.id }}" name="auxiliary_examination">{{ record.auxiliary_examination }}</textarea><br><br>
-
-                        <!-- 诊断 -->
-                        <label for="diagnosis_{{ record.id }}">Diagnosis:</label>
-                        <textarea id="diagnosis_{{ record.id }}" name="diagnosis" required>{{ record.diagnosis }}</textarea><br><br>
-
-                        <!-- 治疗建议 -->
-                        <label for="treatment_advice_{{ record.id }}">Treatment Advice:</label>
-                        <textarea id="treatment_advice_{{ record.id }}" name="treatment_advice" required>{{ record.treatment_advice }}</textarea><br><br>
-
-                        <!-- 医生签名 -->
-                        <label for="doctor_signature_{{ record.id }}">Doctor Signature:</label>
-                        <input type="text" id="doctor_signature_{{ record.id }}" name="doctor_signature" value="{{ record.doctor_signature }}" required><br><br>
-
-                        <!-- 病历状态 -->
-
-                        <!-- 提交按钮 -->
-                        <button type="submit">Update</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
+{% if medical_records %}
+<ul>
+    {% for record in medical_records %}
+    <li>
         <form method="POST">
-            <!-- 隐藏字段，用于标识问诊申请ID -->
-            <input type="hidden" name="request_id" value="{{ request_id }}">
-
-            <!-- 患者ID -->
-            <label for="patient_id">Patient ID:</label>
-            <input type="text" id="patient_id" name="patient_id" required><br><br>
+            <!-- 隐藏字段，用于标识记录ID、患者ID和问诊申请ID -->
+            <input name="record_id" type="hidden" value="{{ record.id }}">
+            <input name="patient_id" type="hidden" value="{{ record.patient_id }}">
+            <input name="request_id" type="hidden" value="{{ request_id }}">
 
             <!-- 就诊日期 -->
-            <label for="visit_date">Visit Date:</label>
-            <input type="datetime-local" id="visit_date" name="visit_date" required><br><br>
+            <label for="visit_date_{{ record.id }}">Visit Date:</label>
+            <input id="visit_date_{{ record.id }}" name="visit_date" required
+                   type="datetime-local" value="{{ record.visit_date }}"><br><br>
 
             <!-- 科室 -->
-            <label for="department">Department:</label>
-            <input type="text" id="department" name="department" required><br><br>
+            <label for="department_{{ record.id }}">Department:</label>
+            <input id="department_{{ record.id }}" name="department" required type="text"
+                   value="{{ record.department }}"><br><br>
 
             <!-- 患者主诉 -->
-            <label for="patient_complaint">Patient Complaint:</label>
-            <textarea id="patient_complaint" name="patient_complaint" required></textarea><br><br>
+            <label for="patient_complaint_{{ record.id }}">Patient Complaint:</label>
+            <textarea id="patient_complaint_{{ record.id }}" name="patient_complaint" required>{{ record.patient_complaint }}</textarea><br><br>
 
             <!-- 病史 -->
-            <label for="medical_history">Medical History:</label>
-            <textarea id="medical_history" name="medical_history"></textarea><br><br>
+            <label for="medical_history_{{ record.id }}">Medical History:</label>
+            <textarea id="medical_history_{{ record.id }}"
+                      name="medical_history">{{ record.medical_history }}</textarea><br><br>
 
             <!-- 体格检查 -->
-            <label for="physical_examination">Physical Examination:</label>
-            <textarea id="physical_examination" name="physical_examination"></textarea><br><br>
+            <label for="physical_examination_{{ record.id }}">Physical Examination:</label>
+            <textarea id="physical_examination_{{ record.id }}" name="physical_examination">{{ record.physical_examination }}</textarea><br><br>
 
             <!-- 辅助检查 -->
-            <label for="auxiliary_examination">Auxiliary Examination:</label>
-            <textarea id="auxiliary_examination" name="auxiliary_examination"></textarea><br><br>
+            <label for="auxiliary_examination_{{ record.id }}">Auxiliary Examination:</label>
+            <textarea id="auxiliary_examination_{{ record.id }}" name="auxiliary_examination">{{ record.auxiliary_examination }}</textarea><br><br>
 
             <!-- 诊断 -->
-            <label for="diagnosis">Diagnosis:</label>
-            <textarea id="diagnosis" name="diagnosis" required></textarea><br><br>
+            <label for="diagnosis_{{ record.id }}">Diagnosis:</label>
+            <textarea id="diagnosis_{{ record.id }}" name="diagnosis" required>{{ record.diagnosis }}</textarea><br><br>
 
             <!-- 治疗建议 -->
-            <label for="treatment_advice">Treatment Advice:</label>
-            <textarea id="treatment_advice" name="treatment_advice" required></textarea><br><br>
+            <label for="treatment_advice_{{ record.id }}">Treatment Advice:</label>
+            <textarea id="treatment_advice_{{ record.id }}" name="treatment_advice" required>{{ record.treatment_advice }}</textarea><br><br>
 
             <!-- 医生签名 -->
-            <label for="doctor_signature">Doctor Signature:</label>
-            <input type="text" id="doctor_signature" name="doctor_signature" required><br><br>
+            <label for="doctor_signature_{{ record.id }}">Doctor Signature:</label>
+            <input id="doctor_signature_{{ record.id }}" name="doctor_signature" required
+                   type="text" value="{{ record.doctor_signature }}"><br><br>
 
             <!-- 病历状态 -->
-            <label for="status">Status:</label>
-            <select id="status" name="status" required>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-            </select><br><br>
 
             <!-- 提交按钮 -->
-            <button type="submit">Create</button>
+            <button type="submit">Update</button>
         </form>
-    {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<form method="POST">
+    <!-- 隐藏字段，用于标识问诊申请ID -->
+    <input name="request_id" type="hidden" value="{{ request_id }}">
 
-    <!-- 返回病历管理页面的链接 -->
-    <p><a href="{{ url_for('doctor_bp.medical_record', request_id=request_id) }}">Back to Medical Record</a></p>
+    <!-- 患者ID -->
+    <label for="patient_id">Patient ID:</label>
+    <input id="patient_id" name="patient_id" required type="text"><br><br>
+
+    <!-- 就诊日期 -->
+    <label for="visit_date">Visit Date:</label>
+    <input id="visit_date" name="visit_date" required type="datetime-local"><br><br>
+
+    <!-- 科室 -->
+    <label for="department">Department:</label>
+    <input id="department" name="department" required type="text"><br><br>
+
+    <!-- 患者主诉 -->
+    <label for="patient_complaint">Patient Complaint:</label>
+    <textarea id="patient_complaint" name="patient_complaint" required></textarea><br><br>
+
+    <!-- 病史 -->
+    <label for="medical_history">Medical History:</label>
+    <textarea id="medical_history" name="medical_history"></textarea><br><br>
+
+    <!-- 体格检查 -->
+    <label for="physical_examination">Physical Examination:</label>
+    <textarea id="physical_examination" name="physical_examination"></textarea><br><br>
+
+    <!-- 辅助检查 -->
+    <label for="auxiliary_examination">Auxiliary Examination:</label>
+    <textarea id="auxiliary_examination" name="auxiliary_examination"></textarea><br><br>
+
+    <!-- 诊断 -->
+    <label for="diagnosis">Diagnosis:</label>
+    <textarea id="diagnosis" name="diagnosis" required></textarea><br><br>
+
+    <!-- 治疗建议 -->
+    <label for="treatment_advice">Treatment Advice:</label>
+    <textarea id="treatment_advice" name="treatment_advice" required></textarea><br><br>
+
+    <!-- 医生签名 -->
+    <label for="doctor_signature">Doctor Signature:</label>
+    <input id="doctor_signature" name="doctor_signature" required type="text"><br><br>
+
+    <!-- 病历状态 -->
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+    </select><br><br>
+
+    <!-- 提交按钮 -->
+    <button type="submit">Create</button>
+</form>
+{% endif %}
+
+<!-- 返回病历管理页面的链接 -->
+<p><a href="{{ url_for('doctor_bp.medical_record', request_id=request_id) }}">Back to Medical Record</a></p>
 </body>
 </html>

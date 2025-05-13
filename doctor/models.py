@@ -1,12 +1,14 @@
 import mysql.connector
 from mysql.connector import Error
+
 from config import db_config
-from datetime import datetime
 from crypto import *
+
 
 # 获取登录信息
 def get_doctor_login(username):
-    connection = None;cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -29,7 +31,8 @@ def get_doctor_login(username):
 
 
 def get_doctor_login_id(user_id):
-    connection = None;cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -53,7 +56,8 @@ def get_doctor_login_id(user_id):
 
 # 创建医生登录信息
 def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
-    connection = None; cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -79,14 +83,16 @@ def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
 
 # 创建医生个人信息（待改
 def create_doctor_profile(user_id, full_name, gender, birth_date, department, title):
-    connection = None;cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
         # 插入医生个人信息
-        cursor.execute("INSERT INTO doctor_profiles (id, full_name, gender, birth_date, department, title) VALUES (%s, %s, %s, %s,%s,%s)",
-                       (user_id, full_name, gender, birth_date, department, title))
+        cursor.execute(
+            "INSERT INTO doctor_profiles (id, full_name, gender, birth_date, department, title) VALUES (%s, %s, %s, %s,%s,%s)",
+            (user_id, full_name, gender, birth_date, department, title))
         # 提交事务
         connection.commit()
         return True
@@ -104,7 +110,8 @@ def create_doctor_profile(user_id, full_name, gender, birth_date, department, ti
 
 
 def get_doctor_profile(user_id):
-    connection = None; cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -235,6 +242,7 @@ def get_patient_key(pt_id):
             connection.close()
     return pt_key
 
+
 def get_consultation_requests(doctor_id):
     connection = None
     cursor = None
@@ -288,6 +296,7 @@ def update_consultation_request(request_id, status):
             connection.close()
     return success
 
+
 # 从问诊申请号获得患者的id
 def get_patient_id(request_id):
     connection = None
@@ -310,6 +319,7 @@ def get_patient_id(request_id):
             connection.close()
     return patient_id
 
+
 '''
 def get_notification_message(status):
     if status == 'accepted':
@@ -320,6 +330,8 @@ def get_notification_message(status):
         return 'The doctor has ended your consultation.'
     return 'Unknown status'
 '''
+
+
 def get_notification_message(status, doctor_name):
     """
     根据状态生成通知消息
@@ -334,6 +346,7 @@ def get_notification_message(status, doctor_name):
     elif status == 'completed':
         return f'The consultation with Dr. {doctor_name} has been completed.'
     return 'Unknown status'
+
 
 def add_notification(patient_id, consultation_request_id, status):
     connection = None
@@ -359,7 +372,7 @@ def add_notification(patient_id, consultation_request_id, status):
             return False
         doctor_name = doctor_profile['full_name']
 
-        message = get_notification_message(status,doctor_name)
+        message = get_notification_message(status, doctor_name)
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute(
             "INSERT INTO patient_notifications (patient_id, consultation_request_id, message, time) VALUES (%s, %s, %s, %s)",
@@ -401,7 +414,7 @@ def get_active_consultation_requests(doctor_id):
     return requests
 
 
-def create_medical_record(consultation_request_id,patient_id):
+def create_medical_record(consultation_request_id, patient_id):
     """
     创建新的病历记录，自动填写病历号、问诊申请号、患者号、医生号、问诊时间、科室和病历创建时间，并将病历状态设置为 'uc'（未完成）。
     :param consultation_request_id: 问诊申请ID
@@ -456,7 +469,8 @@ def create_medical_record(consultation_request_id,patient_id):
     return success
 
 
-def update_medical_record(record_id, patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis, treatment_advice):
+def update_medical_record(record_id, patient_complaint, medical_history, physical_examination, auxiliary_examination,
+                          diagnosis, treatment_advice):
     """
     更新病历记录中的详细信息。
     :param record_id: 病历记录ID
@@ -488,7 +502,8 @@ def update_medical_record(record_id, patient_complaint, medical_history, physica
                 treatment_advice = %s
             WHERE id = %s
             """,
-            (patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis, treatment_advice, record_id)
+            (patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis,
+             treatment_advice, record_id)
         )
         connection.commit()
         success = True
@@ -552,7 +567,8 @@ def submit_medical_record(record_id, doctor_signature):
     return success
 
 
-def update_medical_record_by_request(request_id, patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis, treatment_advice):
+def update_medical_record_by_request(request_id, patient_complaint, medical_history, physical_examination,
+                                     auxiliary_examination, diagnosis, treatment_advice):
     """
     更新病历记录中的详细信息。
     :param request_id: 问诊申请ID
@@ -583,7 +599,8 @@ def update_medical_record_by_request(request_id, patient_complaint, medical_hist
                 treatment_advice = %s
             WHERE consultation_request_id = %s
             """,
-            (patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis, treatment_advice, request_id)
+            (patient_complaint, medical_history, physical_examination, auxiliary_examination, diagnosis,
+             treatment_advice, request_id)
         )
         connection.commit()
         success = True
@@ -613,7 +630,8 @@ def submit_medical_record_by_request(request_id, doctor_signature):
         cursor = connection.cursor(dictionary=True)
 
         # 获取医生ID和当前时间
-        cursor.execute("SELECT doctor_id FROM processing_medical_records WHERE consultation_request_id = %s", (request_id,))
+        cursor.execute("SELECT doctor_id FROM processing_medical_records WHERE consultation_request_id = %s",
+                       (request_id,))
         medical_record = cursor.fetchone()
         if not medical_record:
             print("Medical record not found.")
@@ -704,6 +722,7 @@ def get_medical_records_by_request(request_id):
             cursor.close()
             connection.close()
     return medical_records
+
 
 # 自动获取医生id为指定id，并且状态为na的病历，并查询审核记录中对应的最新审核意见（时间降序），整合为特定格式后返回
 # 需要：病历id，审核意见，审核时间，负责管理员

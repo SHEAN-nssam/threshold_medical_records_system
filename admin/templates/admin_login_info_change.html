@@ -11,15 +11,15 @@
     <!--提供输入旧密码，新用户名，新密码的输入框
     旧密码必须输入，新用户名和新密码文本框可以只输入其中一个-->
     <label for="old_password">请输入原密码：</label>
-    <input type="text" id="old_password" name="old_password" required>
+    <input id="old_password" name="old_password" required type="text">
     <label for="new_username">请输入新用户名：</label>
-    <input type="text" id="new_username" name="new_username">
+    <input id="new_username" name="new_username" type="text">
     <label for="new_password">请输入新密码：</label>
-    <input type="text" id="new_password" name="new_password">
+    <input id="new_password" name="new_password" type="text">
     <button type="submit">提交新的登录信息</button>
 </form>
 {% if message %}
-    <p>{{ message }}</p>
+<p>{{ message }}</p>
 {% endif %}
 {% endblock %}
 

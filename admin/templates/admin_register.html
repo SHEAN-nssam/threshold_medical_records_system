@@ -2,29 +2,29 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Admin Register</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link href="/static/css/main.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
     <main>
         <div class="card admin-card">
-    <h2>Admin Register</h2>
+            <h2>Admin Register</h2>
 
-    {% if message %}
-        <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
-    {% endif %}
-    <form method="POST" action="/admin/register">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+            {% if message %}
+            <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
+            {% endif %}
+            <form action="/admin/register" method="POST">
+                <label for="username">Username:</label>
+                <input id="username" name="username" required type="text"><br><br>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+                <label for="password">Password:</label>
+                <input id="password" name="password" required type="password"><br><br>
 
-        <button type="submit">Register</button>
-    </form>
-    <p style="margin-top: 20px;">Already have an account? <a href="/admin/login">Login</a></p>
+                <button type="submit">Register</button>
+            </form>
+            <p style="margin-top: 20px;">Already have an account? <a href="/admin/login">Login</a></p>
         </div>
     </main>
 </div>

@@ -5,11 +5,11 @@
 {% block content %}
 <form method="post">
     <label for="pt_id">请输入要查询的患者id：</label>
-    <input type="text" id="pt_id" name="pt_id" required>
+    <input id="pt_id" name="pt_id" required type="text">
     <button type="submit">发起调取提议</button>
 </form>
 {% if message %}
-    <p>{{ message }}</p>
+<p>{{ message }}</p>
 {% endif %}
 {% endblock %}
 

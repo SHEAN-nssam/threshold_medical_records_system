@@ -3,9 +3,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>{% block title %}管理员主页{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link href="/static/css/main.css" rel="stylesheet">
     <style>
         /* 浮窗样式 */
         #float-window {
@@ -19,53 +19,54 @@
             border-radius: 5px;
             z-index: 1000; /* 确保浮窗在最上层 */
         }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>医疗系统</h1>
-        </header>
+<div class="container">
+    <header>
+        <h1>医疗系统</h1>
+    </header>
 
-        <div class="content">
-            <div class="sidebar">
-                <h2>功能菜单</h2>
-                <div class="function-buttons">
-                    <a href="{{ url_for('admin_bp.review_list') }}" class="function-button purple">
-                        <h3>审核病历</h3>
-                    </a>
-                    <a href="{{ url_for('admin_bp.retrieve_medical_records') }}" class="function-button blue">
-                        <h3>调取病历</h3>
-                    </a>
-                    <a href="{{ url_for('admin_bp.review_proposals') }}" class="function-button green">
-                        <h3>审核调取提议</h3>
-                    </a>
-                    <a href="{{ url_for('admin_bp.my_proposals') }}" class="function-button orange">
-                        <h3>我发起的提议</h3>
-                    </a>
-                </div>
-            </div>
-
-            <div class="main-content">
-
-
-                <div class="content-area">
-                    <!-- 这里可以放置具体页面的内容 -->
-                    {% block content %}
-                    <h2>欢迎，管理员 {{ username }}!</h2>
-                    <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
-                    <p>这是管理员主页内容区域。</p>
-                    {% endblock %}
-                </div>
+    <div class="content">
+        <div class="sidebar">
+            <h2>功能菜单</h2>
+            <div class="function-buttons">
+                <a class="function-button purple" href="{{ url_for('admin_bp.review_list') }}">
+                    <h3>审核病历</h3>
+                </a>
+                <a class="function-button blue" href="{{ url_for('admin_bp.retrieve_medical_records') }}">
+                    <h3>调取病历</h3>
+                </a>
+                <a class="function-button green" href="{{ url_for('admin_bp.review_proposals') }}">
+                    <h3>审核调取提议</h3>
+                </a>
+                <a class="function-button orange" href="{{ url_for('admin_bp.my_proposals') }}">
+                    <h3>我发起的提议</h3>
+                </a>
             </div>
         </div>
 
-        <footer>
-            <button class="btn" onclick="logout()">退出登录</button>
-        </footer>
+        <div class="main-content">
+
+
+            <div class="content-area">
+                <!-- 这里可以放置具体页面的内容 -->
+                {% block content %}
+                <h2>欢迎，管理员 {{ username }}!</h2>
+                <h3>登录状态：{{ username }} (ID: {{ user_id }})</h3>
+                <p>这是管理员主页内容区域。</p>
+                {% endblock %}
+            </div>
+        </div>
     </div>
 
-    <script>
+    <footer>
+        <button class="btn" onclick="logout()">退出登录</button>
+    </footer>
+</div>
+
+<script>
         function logout() {
             // 处理退出登录的逻辑
             window.location.href = "{{ url_for('admin_bp.logout') }}";
@@ -87,7 +88,8 @@
             hideFloatWindow();
             // 这里可以将选择结果发送到后端
         }
-    </script>
+
+</script>
 </body>
 </html>
 

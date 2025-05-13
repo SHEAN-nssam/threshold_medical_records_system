@@ -2,30 +2,30 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Admin Login</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link href="/static/css/main.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
     <header>
-    <h2>管理员登录</h2>
+        <h2>管理员登录</h2>
     </header>
     <main>
-    <div class="card admin-card">
-    <form method="POST" action="/admin/login">
-        {% if message %}
-            <p style="color: red;">{{ message }}</p>
-        {% endif %}
-        <label for="username">用户名：</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <div class="card admin-card">
+            <form action="/admin/login" method="POST">
+                {% if message %}
+                <p style="color: red;">{{ message }}</p>
+                {% endif %}
+                <label for="username">用户名：</label>
+                <input id="username" name="username" required type="text"><br><br>
 
-        <label for="password">密码：</label>
-        <input type="password" id="password" name="password" required><br><br>
+                <label for="password">密码：</label>
+                <input id="password" name="password" required type="password"><br><br>
 
-        <button type="submit">登录</button>
-    </form>
-    <p style="margin-top: 20px;">没有账号？<a href="/admin/register">注册</a></p>
+                <button type="submit">登录</button>
+            </form>
+            <p style="margin-top: 20px;">没有账号？<a href="/admin/register">注册</a></p>
         </div>
     </main>
 </div>

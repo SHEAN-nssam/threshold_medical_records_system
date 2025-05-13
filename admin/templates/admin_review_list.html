@@ -1,28 +1,27 @@
-
 {% extends "admin_dashboard.html" %}
 
 {% block title %}审核列表{% endblock %}
 
 {% block content %}
 <div id="records">
-        {% if records %}
-            <ul>
-                {% for record in records %}
-                    <li>
-                        record ID: {{ record.id }}
-                        <p>Doctor ID: {{ record.doctor_id }}</p>
-                        <p>Patient ID: {{ record.patient_id }}</p>
-                        <p>创建时间:{{ record.created_at}}</p>
-                        <p>Status: {{ record.status }}</p>
-                        <a href="{{ url_for('admin_bp.review_record', record_id=record.id) }}" class="btn">审核该病历</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No records to review.</p>
-        {% endif %}
-            <p><a href="{{ url_for('admin_bp.ad_home') }}" class="btn">Back to Home</a></p>
-    </div>
+    {% if records %}
+    <ul>
+        {% for record in records %}
+        <li>
+            record ID: {{ record.id }}
+            <p>Doctor ID: {{ record.doctor_id }}</p>
+            <p>Patient ID: {{ record.patient_id }}</p>
+            <p>创建时间:{{ record.created_at}}</p>
+            <p>Status: {{ record.status }}</p>
+            <a class="btn" href="{{ url_for('admin_bp.review_record', record_id=record.id) }}">审核该病历</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No records to review.</p>
+    {% endif %}
+    <p><a class="btn" href="{{ url_for('admin_bp.ad_home') }}">Back to Home</a></p>
+</div>
 {% endblock %}
 
 

@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
+
 from config import db_config
-from datetime import datetime
 from crypto import *
 
 
@@ -136,7 +136,6 @@ def get_admin_akey(admin_id, password):
     return akey
 
 
-
 def get_medical_record(record_id):
     connection = None
     cursor = None
@@ -190,6 +189,7 @@ def get_medical_records_waiting_review():
             cursor.close()
             connection.close()
     return me_records
+
 
 def get_admin_public_key():
     """
@@ -248,28 +248,26 @@ def approve_medical_record(record_id, mr, server_share):
         cursor.execute("SELECT * FROM processing_medical_records WHERE id = %s", (record_id,))
         record = cursor.fetchone()
 
-
         # 插入归档病历表
         insert_query = (
-                "INSERT INTO archived_medical_records "
-                "(consultation_request_id, patient_id, doctor_id, visit_date, "
-                "department, patient_complaint, medical_history, "
-                "physical_examination, auxiliary_examination, diagnosis, "
-                "treatment_advice, doctor_signature, created_at, server_share) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            )
+            "INSERT INTO archived_medical_records "
+            "(consultation_request_id, patient_id, doctor_id, visit_date, "
+            "department, patient_complaint, medical_history, "
+            "physical_examination, auxiliary_examination, diagnosis, "
+            "treatment_advice, doctor_signature, created_at, server_share) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        )
 
         insert_values = (
-                mr['consultation_request_id'], mr['patient_id'], mr['doctor_id'], mr['visit_date'],
-                mr['department'], mr['patient_complaint'], mr['medical_history'],
-                mr['physical_examination'], mr['auxiliary_examination'], mr['diagnosis'],
-                mr['treatment_advice'], mr['doctor_signature'], mr['created_at'], server_share
+            mr['consultation_request_id'], mr['patient_id'], mr['doctor_id'], mr['visit_date'],
+            mr['department'], mr['patient_complaint'], mr['medical_history'],
+            mr['physical_examination'], mr['auxiliary_examination'], mr['diagnosis'],
+            mr['treatment_advice'], mr['doctor_signature'], mr['created_at'], server_share
         )
         cursor.execute(insert_query, insert_values)
 
         # 删除原病历
         cursor.execute("DELETE FROM processing_medical_records WHERE id = %s", (record_id,))
-
 
         connection.commit()
         success = True
@@ -313,7 +311,7 @@ def get_patient_key(pt_id):
 
 
 # 分别插入患者分片和管理员分片
-def insert_patient_share(mrid,pt_share):
+def insert_patient_share(mrid, pt_share):
     connection = None
     cursor = None
     success = False
@@ -340,7 +338,7 @@ def insert_patient_share(mrid,pt_share):
         return success
 
 
-def insert_admin_share(mrid,ad_share):
+def insert_admin_share(mrid, ad_share):
     connection = None
     cursor = None
     success = False
@@ -353,7 +351,7 @@ def insert_admin_share(mrid,ad_share):
                        (mrid, ad_share))
         # 提交事务
         connection.commit()
-        success=True
+        success = True
     except Error as e:
         if connection and connection.is_connected():
             connection.rollback()
@@ -397,8 +395,9 @@ def reject_medical_record(record_id):
             connection.close()
     return success
 
+
 # 编写函数创建通过的的审核记录
-def create_review_record_pass(mr_id,ad_id):
+def create_review_record_pass(mr_id, ad_id):
     '''
     :param mr_id: 被审核的病历号
     :param ad_id: 审核的管理员号
@@ -412,8 +411,9 @@ def create_review_record_pass(mr_id,ad_id):
         cursor = connection.cursor()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # 插入
-        cursor.execute("INSERT INTO review_records_archived (mr_id, result, review_by, review_date) VALUES (%s, %s, %s, %s)",
-                       (mr_id, True, ad_id, current_time))
+        cursor.execute(
+            "INSERT INTO review_records_archived (mr_id, result, review_by, review_date) VALUES (%s, %s, %s, %s)",
+            (mr_id, True, ad_id, current_time))
         # 提交事务
         connection.commit()
         return True
@@ -429,8 +429,9 @@ def create_review_record_pass(mr_id,ad_id):
             cursor.close()
             connection.close()
 
+
 # 编写函数创建带有审核意见的审核记录
-def create_review_record_not_pass(mr_id,ad_id,opi):
+def create_review_record_not_pass(mr_id, ad_id, opi):
     '''
     编写函数创建带有审核意见的审核记录（主要是未通过的记录）
     :param mr_id: 被审核的病历号
@@ -446,9 +447,10 @@ def create_review_record_not_pass(mr_id,ad_id,opi):
         cursor = connection.cursor()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # 插入
-        cursor.execute("INSERT INTO review_records_processing (mr_id, result, review_opinions, review_by, review_date) VALUES "
-                       "(%s, %s, %s, %s, %s)",
-                       (mr_id, False, opi, ad_id, current_time))
+        cursor.execute(
+            "INSERT INTO review_records_processing (mr_id, result, review_opinions, review_by, review_date) VALUES "
+            "(%s, %s, %s, %s, %s)",
+            (mr_id, False, opi, ad_id, current_time))
         # 提交事务
         connection.commit()
         return True
@@ -506,7 +508,7 @@ def create_retrieve_proposal(ad_id, pt_id):
             admin_count = result['admin_count']
             print("现有管理员总数：", admin_count)
             # 计算管理员的最低门槛（奇数取 ceil(admin_count / 2)，偶数取 admin_count / 2 + 1）
-            required_approvals = int((admin_count/2)+1)
+            required_approvals = int((admin_count / 2) + 1)
             print("计算得门槛数：", required_approvals)
             cursor.execute("INSERT INTO retrieve_proposals ("
                            "propose_admin, patient_id, status, approving_admins, "
@@ -651,6 +653,7 @@ def get_own_proposals(ad_id):
 
     return proposals
 
+
 def get_other_proposals(ad_id):
     connection = None
     cursor = None
@@ -690,7 +693,7 @@ def pass_retrieve_proposal(proposal_id, ad_id, en_share):
         # 获取提议的信息
         cursor.execute("SELECT * "
                        "FROM retrieve_proposals WHERE id = %s"
-                       , (proposal_id, ))
+                       , (proposal_id,))
         result = cursor.fetchone()
         print("其他管理员查询到的提议记录，", result)
         if not result:
@@ -784,6 +787,7 @@ def get_proposal_shares(proposal_id):
             connection.close()
 
     return shares
+
 
 def get_share_id(ad_id):
     connection = None
@@ -884,7 +888,8 @@ def get_doctor_key(doc_id):
 
 # 创建医生登录信息
 def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
-    connection = None; cursor = None
+    connection = None;
+    cursor = None
     try:
         # 连接数据库
         connection = mysql.connector.connect(**db_config)
@@ -916,4 +921,3 @@ if __name__ == '__main__':
         print(r)
 
     get_medical_records_waiting_review()
-
