@@ -492,8 +492,30 @@ def get_medical_records_by_patient(pt_id):
     return pt_records
 
 
+def get_medical_records_by_patient_and_date(pt_id, start_date, end_date):
+    connection = None
+    cursor = None
+    pt_records = []
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM archived_medical_records "
+                       "WHERE patient_id = %s AND created_at BETWEEN %s AND %s",
+                       (pt_id, start_date, end_date))
+        pt_records = cursor.fetchall()
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        print(f"get_medical_records_by_patient_and_date_Error: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return pt_records
+
+
 # 管理员发起调取提议
-def create_retrieve_proposal(ad_id, pt_id):
+def create_retrieve_proposal(ad_id, pt_id, start_date, end_date):
     connection = None
     cursor = None
     success = False
@@ -512,10 +534,10 @@ def create_retrieve_proposal(ad_id, pt_id):
             print("计算得门槛数：", required_approvals)
             cursor.execute("INSERT INTO retrieve_proposals ("
                            "propose_admin, patient_id, status, approving_admins, "
-                           "approval_count, created_at, required_approvals) "
-                           "VALUES (%s, %s, %s, %s, %s, NOW(), %s)"
+                           "approval_count, created_at, required_approvals, start_date, end_date) "
+                           "VALUES (%s, %s, %s, %s, %s, NOW(), %s, %s, %s)"
                            , (ad_id, pt_id, 0, f"{ad_id}",
-                              1, required_approvals))
+                              1, required_approvals, start_date, end_date))
 
         # 提交事务
         connection.commit()
@@ -532,6 +554,30 @@ def create_retrieve_proposal(ad_id, pt_id):
             connection.close()
 
     return success
+
+
+def get_proposal_date_range(proposal_id):
+    connection = None
+    cursor = None
+    date_range = None
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT start_date, end_date FROM retrieve_proposals WHERE id = %s", (proposal_id,))
+        result = cursor.fetchone()
+        if result:
+            start_date = result['start_date']
+            end_date = result['end_date']
+            date_range = (start_date, end_date)
+    except Error as e:
+        if connection and connection.is_connected():
+            connection.rollback()
+        print(f"get_proposal_date_range_Error: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return date_range if date_range else (datetime.min, datetime.max)
 
 
 # 获取某提议对应的提出管理员的公钥
@@ -888,7 +934,7 @@ def get_doctor_key(doc_id):
 
 # 创建医生登录信息
 def create_doctor_login(user_id, username, password_hash, salt, akey, bkey):
-    connection = None;
+    connection = None
     cursor = None
     try:
         # 连接数据库

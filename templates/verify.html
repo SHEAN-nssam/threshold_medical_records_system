@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>病历电子签名验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-container {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #c0c0c0;
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #a9a9a9;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+        .success {
+            color: #008000;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>病历电子签名验证</h1>
+    {% if message %}
+        <p style="color: green;"> {% if 'error' in message %}style="color: red;"{% endif %}{{ message }}</p>
+    {% endif %}
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" accept=".json,.docx,.pdf" required>
+            <button type="submit">上传文件</button>
+        </form>
+        <div id="result">
+            {% if results %}
+            <!--这部分需要能显示文件的验签结果，逐行输出xxx号病历，验签结果为真/假-->
+            <ul>
+             {% for record_id, is_valid in results.items() %}
+            <li>
+                    <p>病历 {{ record_id }}: <span class="{% if is_valid %}success{% else %}error{% endif %}">{% if is_valid %}验证通过{% else %}验证失败{% endif %}</span></p>
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <p><a id="button" href="{{ url_for('index') }}">返回主页</a></p>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('result');
+
+            // 显示加载状态
+            resultDiv.innerHTML = '正在处理文件，请稍候...';
+            resultDiv.style.display = 'block';
+
+    </script>
+</body>
+</html>

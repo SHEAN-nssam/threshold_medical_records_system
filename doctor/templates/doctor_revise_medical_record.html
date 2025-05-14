@@ -52,29 +52,29 @@
                 <form method="POST">
                     <input type="hidden" name="request_id" value="{{ medical_record.consultation_request_id }}">
 
-                    <label for="patient_complaint">Patient Complaint:</label>
+                    <label for="patient_complaint">患者主诉：</label>
                     <textarea id="patient_complaint" name="patient_complaint" required>{{ medical_record.patient_complaint if medical_record.patient_complaint }}</textarea><br><br>
 
-                    <label for="medical_history">Medical History:</label>
+                    <label for="medical_history">既往病史：</label>
                     <textarea id="medical_history" name="medical_history">{{ medical_record.medical_history if medical_record.medical_history }}</textarea><br><br>
 
-                    <label for="physical_examination">Physical Examination:</label>
+                    <label for="physical_examination">体格检查：</label>
                     <textarea id="physical_examination" name="physical_examination">{{ medical_record.physical_examination if medical_record.physical_examination }}</textarea><br><br>
 
-                    <label for="auxiliary_examination">Auxiliary Examination:</label>
+                    <label for="auxiliary_examination">辅助检查：</label>
                     <textarea id="auxiliary_examination" name="auxiliary_examination">{{ medical_record.auxiliary_examination if medical_record.auxiliary_examination }}</textarea><br><br>
 
-                    <label for="diagnosis">Diagnosis:</label>
+                    <label for="diagnosis">诊断：</label>
                     <textarea id="diagnosis" name="diagnosis" required>{{ medical_record.diagnosis if medical_record.diagnosis }}</textarea><br><br>
 
-                    <label for="treatment_advice">Treatment Advice:</label>
+                    <label for="treatment_advice">处理意见：</label>
                     <textarea id="treatment_advice" name="treatment_advice" required>{{ medical_record.treatment_advice if medical_record.treatment_advice }}</textarea><br><br>
 
-                    <button type="submit" name="action" value="save">Save Draft</button>
-                    <button type="submit" name="action" value="submit">Submit for Review</button>
+                    <button type="submit" name="action" value="save">保存草稿</button>
+                    <button type="submit" name="action" value="submit">提交审核</button>
                 </form>
 
-                <p><a href="{{ url_for('doctor_bp.request_list') }}">Back to Appointments</a></p>
+                <p><a href="{{ url_for('doctor_bp.request_list') }}">返回问诊列表</a></p>
             </div>
         </div>
 

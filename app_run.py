@@ -1,11 +1,14 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import json
+from werkzeug.utils import secure_filename
 import mysql.connector
 from mysql.connector import Error
 from flask_socketio import SocketIO
 from crypto import *
 from datetime import datetime
+from medical_record_editor import *
+
 
 app = Flask(__name__)
 app.secret_key = 'qwertyuiopasdfghjklzxcvbnm--qazwsxedcrfvtgbyhnujmikolp'  # 设置密钥
@@ -43,6 +46,46 @@ class User(UserMixin):
 def index():
     return render_template('index.html')
 
+
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['ALLOWED_EXTENSIONS'] = {'json', 'doc', 'docx', 'pdf'}
+
+# 确保上传文件夹存在
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# 独立验证服务
+@app.route('/verify', methods=['GET', 'POST'])
+def verify():
+    verification_result = []
+    message = None
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            message = 'Error：没有文件部分'
+
+        file = request.files['file']
+        if file.filename == '':
+            message = 'Error：没有选择文件'
+
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            verification_result = verify_signature(file_path)
+            print(verification_result)
+            if isinstance(verification_result, dict):
+                result_str = '\n'.join(
+                    [f'病历 {k}: {"验证通过" if v else "验证失败"}' for k, v in verification_result.items()])
+                print("result_str:", result_str)
+                # return render_template('verify.html', message=result_str)
+                return render_template('verify.html',results=verification_result)
+            else:
+                message='Error：文件解析失败'
+
+    return render_template('verify.html', message=message, results=verification_result)
 
 # 用户加载函数
 @login_manager.user_loader
@@ -173,7 +216,7 @@ def initialize_database():
                 # 密码加密
                 sa = generate_salt()
                 hashed_password = generate_salt_sm3(admin["password"], sa)  # 生成加盐哈希
-                akey, bkey = generate_sm2_key_pair()  # 生成个人的公私密钥对
+                akey, bkey = generate_valid_sm2_key_pair()  # 生成个人的公私密钥对
                 print(f"管理员{admin['username']}的个人私钥：{akey}")
                 print(f"管理员{admin['username']}的个人公钥：{bkey}")
                 tkey = generate_pbkdf2_key(admin["password"], sa)  # 由密码和盐值生成加密私钥的临时对称密钥

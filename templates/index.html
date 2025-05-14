@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>医疗系统</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -16,22 +18,25 @@
         <main>
             <div class="card patient-card">
                 <h2>患者</h2>
-                <p>访问您的医疗记录并预约就诊</p>
                 <a href="/patient/login" class="btn patient-btn">登录 / 注册</a>
             </div>
 
             <div class="card doctor-card">
                 <h2>医生</h2>
-                <p>管理患者记录并更新病史</p>
-                <a href="/doctor/login" class="btn doctor-btn">登录 / 注册</a>
+                <a href="/doctor/login" class="btn doctor-btn">登录</a>
             </div>
 
             <div class="card admin-card">
                 <h2>管理员</h2>
-                <p>系统管理和用户管理</p>
-                <a href="/admin/login" class="btn admin-btn">登录 / 注册</a>
+                <a href="/admin/login" class="btn admin-btn">登录</a>
             </div>
+
         </main>
+
+            <div class = "card verify-card">
+                <h2>独立验证服务</h2>
+                <a href="/verify" class="btn verify-btn">进入</a>
+            </div>
 
         <footer>
             <p>&copy; 2025 医疗系统. 保留所有权利。</p>

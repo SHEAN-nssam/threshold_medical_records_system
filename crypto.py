@@ -156,18 +156,22 @@ def sm2_verify(signature, message, public_key):  # 认证结果为布尔变量
     '''
     sm2签名校验
     :param signature:
-    :param message: 原消息，大概率为字符串
-    :param public_key: 公钥，大概率为十六进制字符串
+    :param message: 原消息，为字符串
+    :param public_key: 公钥，为十六进制字符串
     :return:
     '''
-    # 用于认证的data一般为hash值
-    veri = sm2.CryptSM2(public_key=public_key, private_key="")
-    cal_hash = generate_sm3_hash(message)
-    #print("sm2verihash:", cal_hash)
-    cal_hash = hexstr_bytes(cal_hash)
-    print("用于本次校验生成的哈希值：", cal_hash)
-    verify_result = veri.verify(signature, cal_hash)
-
+    verify_result = None
+    try:
+        # 用于认证的data一般为hash值
+        veri = sm2.CryptSM2(public_key=public_key, private_key="")
+        cal_hash = generate_sm3_hash(message)
+        #print("sm2verihash:", cal_hash)
+        cal_hash = hexstr_bytes(cal_hash)
+        print("用于本次校验生成的哈希值：", cal_hash)
+        # print("将要验证的签名：", signature)
+        verify_result = veri.verify(signature, cal_hash)
+    except Exception as e:
+        print(f"crypto_sm2_verify_error: {e}")
     return verify_result
 
 
@@ -254,7 +258,7 @@ def generate_sm3_hash(data):#哈希值数据为str格式
 import hmac
 def check_sm3_hash(data,get_hash):
     cal_hash = generate_sm3_hash(data)
-    return hmac.compare_digest(cal_hash,get_hash)
+    return hmac.compare_digest(cal_hash, get_hash)
 
 def pack(receive_pubkey, data, send_prikey):
     '''
@@ -516,9 +520,24 @@ def unpack_with_salt(send_pubkey, data, receive_prikey, salt_length=64):
         return None
 
 
+def check_sm2_key_pair(akey,bkey):
+    data = "asdfghjkl"
+    en_data = sm2_encrypt(data, bkey)
+    print("en_data:", en_data)
+    de_data = sm2_decrypt(en_data, akey)
+    print("de_data:", de_data)
+
+
 if __name__ == "__main__":
 
-# 示例用法
+    bkey = "048b674f701c1fd63e3aa0405df528c15b68697b0bbe52351eb2f3f0478f47f4424e746c3730dd252c053b0f3d8a023cd953d6d2017a98764dca8209f6ed1a985c"
+    sign = "9a270edb05a6d1d4f4ddeb1c464487fcfb9cd58756350924696943df162f6306"
+    message = "1-qqqq-aaaa-zzzz-wwww-ssss-xxxx"
+    message = generate_sm3_hash(message)
+
+    re = sm2_verify(sign, message, bkey)
+    print(re)
+    # 示例用法
 
     #salt = b"5209f6f54f0a74a45090e9e306c5d78e"
     data = "Hello,here is 120.你好这里是120"

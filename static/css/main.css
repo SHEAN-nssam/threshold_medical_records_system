@@ -96,6 +96,16 @@ main {
     color: #ff6f00;
 }
 
+/* 验证服务卡片样式 */
+.verify-card{
+    background: linear-gradient(135deg, #e0e0e0 0%, #b3b3b3 100%);
+    color: #7a7a7a;
+    margin: 0 auto;            /* 水平居中 */
+    text-align: center;       /* 文本居中 */
+    padding: 20px;            /* 内边距 */
+}
+
+
 /* 按钮样式 */
 .btn {
     display: inline-block;
@@ -140,6 +150,23 @@ main {
 
 .admin-btn:hover {
     background-color: #ef6c00;
+    transform: scale(1.05);
+}
+
+/* 验证服务按钮样式 */
+.verify-btn {
+    background-color: #c0c0c0; /* 银色 */
+    color: #333333;           /* 深灰色文字提高对比度 */
+    padding: 10px 20px;       /* 按钮内边距 */
+    border: none;             /* 移除边框 */
+    border-radius: 5px;       /* 圆角按钮 */
+    cursor: pointer;          /* 鼠标悬停时显示指针 */
+    margin: 10px;             /* 按钮外边距 */
+    display: inline-block;    /* 确保按钮只占必要宽度 */
+}
+
+.verify-btn:hover {
+    background-color: #a9a9a9; /* 灰色深银色 */
     transform: scale(1.05);
 }
 

@@ -208,7 +208,9 @@
         {"name": "created_at", "type": "DATETIME", "constraints": "DEFAULT CURRENT_TIMESTAMP"},
         {"name": "approving_admins", "type": "TEXT", "constraints": "NOT NULL"},
         {"name": "approval_count", "type": "INT", "constraints": "NOT NULL DEFAULT 1"},
-        {"name": "required_approvals","type": "INT","constraints":"NOT NULL"}
+        {"name": "required_approvals","type": "INT","constraints":"NOT NULL"},
+        {"name": "start_date", "type": "DATETIME", "constraints": "NOT NULL"},
+        {"name": "end_date", "type": "DATETIME", "constraints": "NOT NULL"}
       ],
       "foreign_keys": [
         {"column": "propose_admin", "references": "admins(id)"},

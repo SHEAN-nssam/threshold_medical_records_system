@@ -65,7 +65,7 @@ def register():
         # hashed_password = generate_password_hash(password).encode('utf-8')
         sa = generate_salt()
         hashed_password = generate_salt_sm3(password, sa)
-        akey, bkey = generate_sm2_key_pair()  # 此处密钥对是十六进制字符串]
+        akey, bkey = generate_valid_sm2_key_pair()  # 此处密钥对是十六进制字符串]
         print(f"医生{username}初始生成的私钥：", akey)
         print(f"医生{username}初始生成的公钥：", bkey)
         tkey = generate_pbkdf2_key(password, sa)

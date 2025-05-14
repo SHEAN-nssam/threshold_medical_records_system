@@ -23,10 +23,10 @@
 </div>
 
 <div class="main-content">
-    <h2>Personal Information</h2>
+    <h2>个人信息</h2>
 <div class="content-area">
     {% if not profile_complete %}
-        <p>Please complete your personal information as soon as possible.</p>
+        <p>请尽快完善个人信息</p>
         <a href="{{ url_for('doctor_bp.edit_profile') }}">Complete Personal Information</a>
     {% else %}
         <p>姓名：{{ profile_data.full_name }}</p>
@@ -34,7 +34,7 @@
         <p>出生日期：{{ profile_data.birth_date }}</p>
         <p>年龄：{{age }}</p>
         <p>科室：{{ profile_data.department }}</p>
-        <p>职称{{ profile_data.title }}</p>
+        <p>职称：{{ profile_data.title }}</p>
         <a href="{{ url_for('doctor_bp.edit_profile') }}">编辑个人信息</a>
     {% endif %}
 

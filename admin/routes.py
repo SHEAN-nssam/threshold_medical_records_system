@@ -61,7 +61,7 @@ def register():
         # hashed_password = generate_password_hash(password).encode('utf-8')
         sa = generate_salt()
         hashed_password = generate_salt_sm3(password, sa)
-        akey, bkey = generate_sm2_key_pair()
+        akey, bkey = generate_valid_sm2_key_pair()
         tkey = generate_pbkdf2_key(password, sa)
         akey = sm4_encrypt(akey, tkey)
         del tkey
@@ -111,7 +111,7 @@ def login_info_change():
             my_share = sm2_decrypt(my_share, ad_akey)
             # 生成新哈希值及新密钥
             hashed_password = generate_salt_sm3(new_password, sa)
-            akey, bkey = generate_sm2_key_pair()
+            akey, bkey = generate_valid_sm2_key_pair()
             # 重新加密分片
             en_share = sm2_encrypt(my_share, akey)
             # 迭代对称密钥加密私钥
@@ -252,18 +252,22 @@ def retrieve_medical_records():
     message = ""
     if request.method == 'POST':
         patient_id = request.form['pt_id']
-        # print(patient_id)
+        start_date = datetime.strptime(request.form['start_date'], "%Y-%m-%d")
+        end_date = datetime.strptime(request.form['end_date'], "%Y-%m-%d")
         admin_id = current_user.id  # 假设 current_user 是登录的管理员
 
         # 增加功能对比processing_medical_records表中的created_at，获取某指定时间段内的病历
-
-        # 调用函数创建调取提议
-        success = create_retrieve_proposal(admin_id, patient_id)
-
-        if success:
-            message = "提议创建成功"
+        # 获取时间段内的病历记录
+        pt_records = get_medical_records_by_patient_and_date(patient_id, start_date, end_date)
+        if not pt_records:
+            message = "在指定时间段内没有病历记录"
         else:
-            message = "提议创建失败"
+            # 调用函数创建调取提议
+            success = create_retrieve_proposal(admin_id, patient_id, start_date, end_date)
+            if success:
+                message = "提议创建成功"
+            else:
+                message = "提议创建失败"
     return render_template('admin_retrieve_medical_records.html', message=message)
 
 
@@ -316,8 +320,17 @@ def my_proposals():
 @admin_bp.route('/perform_action/<int:proposal_id>', methods=['GET'])
 @login_required
 def perform_action(proposal_id):
+    # 获取提议的时间范围
+    start_date, end_date = get_proposal_date_range(proposal_id)
+
     pt_id = get_propose_patient(proposal_id)
-    pt_records = get_medical_records_by_patient(pt_id)
+    # pt_records = get_medical_records_by_patient(pt_id)
+    pt_records = get_medical_records_by_patient_and_date(pt_id, start_date, end_date)
+
+    if not pt_records:
+        return render_template('admin_perform_action.html', proposal_id=proposal_id,
+                               message="在指定时间段内没有病历记录")
+
     # 获取个人私钥
     password = session.get('pw')
     ad_akey = get_admin_akey(current_user.id, password)  # bytes

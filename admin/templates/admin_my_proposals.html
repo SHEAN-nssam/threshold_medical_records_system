@@ -12,6 +12,8 @@
         {% if proposal.status == 0 %}正在审批中{% endif %}
         {% if proposal.status == 1 %}已通过{% endif %}
         {% if proposal.status == 2 %}被拒绝{% endif %}
+        <p>创建时间: {{ proposal.created_at }}</p>
+        <p>时间范围: 从 {{ proposal.start_date }} 到 {{ proposal.end_date }}</p>
         <br>
         已同意数量: {{ proposal.approval_count }}/{{ proposal.required_approvals }}
         <br>

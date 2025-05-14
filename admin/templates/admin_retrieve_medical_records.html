@@ -6,6 +6,13 @@
 <form method="post">
     <label for="pt_id">请输入要查询的患者id：</label>
     <input id="pt_id" name="pt_id" required type="text">
+
+     <label for="start_date">起始日期：</label>
+    <input id="start_date" name="start_date" type="date" required>
+
+    <label for="end_date">结束日期：</label>
+    <input id="end_date" name="end_date" type="date" required>
+
     <button type="submit">发起调取提议</button>
 </form>
 {% if message %}

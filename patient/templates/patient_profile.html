@@ -29,10 +29,10 @@
 
     {% else %}
         <!-- 如果用户已填写信息，显示已填写的信息 -->
-        <p>Full Name: {{ profile_data.full_name }}</p>
-        <p>Gender: {{ profile_data.gender }}</p>
-        <p>Birth Date: {{ profile_data.birth_date }}</p>
-        <p>Age: {{ age }}</p>
+        <p>姓名：{{ profile_data.full_name }}</p>
+        <p>性别：{{ profile_data.gender }}</p>
+        <p>出生日期：{{ profile_data.birth_date }}</p>
+        <p>年龄：{{ age }}</p>
     {% endif %}
 
     <p><a href="{{ url_for('patient_bp.pt_home') }}">Back to Home</a></p>
