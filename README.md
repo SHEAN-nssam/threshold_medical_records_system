@@ -7,4 +7,5 @@
 请预先在mysql中创建数据库，并把数据库名称写入database_schema.json文件
 
 database_schema.json是数据库表格配置文件
+
 run.py是废弃文件，database_edit用于单独编辑数据库，和系统功能无关
